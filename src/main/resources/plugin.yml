@@ -7,5 +7,10 @@ depend:
   - BentoBox
   - Vault
 
+commands:
+  generator:
+    description: Custom Generator Ana Komudu
+    usage: /generator
+
 authors: [ ogsammaenr ]
 description: Oyuncuların ada seviyesine göre jeneratörleri satın almasını sağlayan özel kırıktaş jeneratörü eklentisi.

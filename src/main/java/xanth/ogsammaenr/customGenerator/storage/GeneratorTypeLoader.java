@@ -19,7 +19,7 @@ public class GeneratorTypeLoader {
 
     public GeneratorTypeLoader(CustomGenerator plugin) {
         this.plugin = plugin;
-        this.manager = new IslandGeneratorManager(plugin);
+        this.manager = plugin.getIslandGeneratorManager();
     }
 
     ///     Dosyadan generator tiplerini yükler

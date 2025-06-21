@@ -1,6 +1,7 @@
 package xanth.ogsammaenr.customGenerator.manager;
 
 import xanth.ogsammaenr.customGenerator.CustomGenerator;
+import xanth.ogsammaenr.customGenerator.model.GeneratorCategory;
 import xanth.ogsammaenr.customGenerator.model.GeneratorType;
 
 import java.util.*;
@@ -8,13 +9,13 @@ import java.util.*;
 public class IslandGeneratorManager {
     private final CustomGenerator plugin;
 
-    /// Ada ID → Aktif jeneratör tipi ID (ör: "coal")
-    private final Map<String, String> activeGeneratorTypes = new HashMap<>();
+    /// Ada ID → Kategori → Aktif jeneratör tipi ID
+    private final Map<String, Map<GeneratorCategory, String>> activeGeneratorTypes = new HashMap<>();
 
-    /// Ada ID → Satın alınmış jeneratör tipi ID'leri (ör: "coal", "iron")
+    /// Ada ID → Satın alınan jeneratör tipi ID’leri
     private final Map<String, Set<String>> ownedGeneratorTypes = new HashMap<>();
 
-    /// Plugin'de tanımlanmış jeneratör tipleri
+    /// Tanımlı jeneratör tipleri
     private final Map<String, GeneratorType> registeredTypes = new HashMap<>();
 
     public IslandGeneratorManager(CustomGenerator plugin) {
@@ -27,22 +28,24 @@ public class IslandGeneratorManager {
 
     /// Ada için aktif jeneratör tipi ayarla
     public void setGeneratorType(String islandId, String typeId) {
-        if (!isRegistered(typeId)) {
+        GeneratorType type = getRegisteredType(typeId);
+        if (type == null) {
             plugin.getLogger().warning("Bilinmeyen jeneratör tipi: " + typeId);
             return;
         }
 
-        activeGeneratorTypes.put(islandId, typeId);
+        activeGeneratorTypes.putIfAbsent(islandId, new HashMap<>());
+        activeGeneratorTypes.get(islandId).put(type.getGeneratorCategory(), typeId);
     }
 
     /// Ada için aktif jeneratör tipi ID'sini al
-    public String getGeneratorTypeId(String islandId) {
-        return activeGeneratorTypes.get(islandId);
+    public String getGeneratorTypeId(String islandId, GeneratorCategory category) {
+        return activeGeneratorTypes.getOrDefault(islandId, Collections.emptyMap()).get(category);
     }
 
     /// Ada için aktif jeneratör tipi nesnesini al
-    public GeneratorType getGeneratorType(String islandId) {
-        String typeId = getGeneratorTypeId(islandId);
+    public GeneratorType getGeneratorType(String islandId, GeneratorCategory category) {
+        String typeId = getGeneratorTypeId(islandId, category);
         return typeId == null ? null : registeredTypes.get(typeId);
     }
 
@@ -66,6 +69,10 @@ public class IslandGeneratorManager {
 
         ownedGeneratorTypes.putIfAbsent(islandId, new HashSet<>());
         ownedGeneratorTypes.get(islandId).add(typeId);
+    }
+
+    public Map<GeneratorCategory, String> getActiveTypes(String islandId) {
+        return activeGeneratorTypes.getOrDefault(islandId, Collections.emptyMap());
     }
 
     // ==========================
@@ -98,5 +105,13 @@ public class IslandGeneratorManager {
 
     public void saveIslandData() {
         // TODO: Ada jeneratör verilerini diske kaydet
+    }
+
+    public String getRegisteredTypeString() {
+        String typeId = "";
+        for (GeneratorType type : registeredTypes.values()) {
+            typeId += type.getId() + " ";
+        }
+        return typeId;
     }
 }

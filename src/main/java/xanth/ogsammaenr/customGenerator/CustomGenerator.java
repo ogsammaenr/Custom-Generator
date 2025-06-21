@@ -1,20 +1,25 @@
 package xanth.ogsammaenr.customGenerator;
 
 import org.bukkit.plugin.java.JavaPlugin;
+import xanth.ogsammaenr.customGenerator.commands.GeneratorCommand;
 import xanth.ogsammaenr.customGenerator.manager.EconomyManager;
 import xanth.ogsammaenr.customGenerator.manager.IslandGeneratorManager;
 import xanth.ogsammaenr.customGenerator.storage.GeneratorTypeLoader;
+import xanth.ogsammaenr.customGenerator.util.IslandUtils;
 
 public final class CustomGenerator extends JavaPlugin {
     private CustomGenerator instance;
 
     private EconomyManager economyManager;
-    private IslandGeneratorManager generatorManager;
+    private IslandGeneratorManager islandGeneratorManager;
     private GeneratorTypeLoader typeLoader;
+    private IslandUtils islandUtils;
 
     @Override
     public void onEnable() {
         this.instance = this;
+
+        this.islandUtils = new IslandUtils();
 
         saveDefaultConfig();
 
@@ -26,14 +31,14 @@ public final class CustomGenerator extends JavaPlugin {
             return;
         }
 
-        generatorManager = new IslandGeneratorManager(this);
+        islandGeneratorManager = new IslandGeneratorManager(this);
 
         typeLoader = new GeneratorTypeLoader(this);
         typeLoader.loadGeneratorTypes();
 
-//        ///========== Komut kayıtları ==========
-//        getCommand("generator").setExecutor(new commands.GeneratorCommand(this));
-//
+        ///========== Komut kayıtları ==========
+        getCommand("generator").setExecutor(new GeneratorCommand(this));
+
 //        ///========== listener Kayıtları =========
 //        getServer().getPluginManager().registerEvents(new listeners.BlockBreakListener(this), this);
 
@@ -52,10 +57,15 @@ public final class CustomGenerator extends JavaPlugin {
     }
 
     public IslandGeneratorManager getIslandGeneratorManager() {
-        return generatorManager;
+        return islandGeneratorManager;
     }
 
     public CustomGenerator getInstance() {
         return instance;
     }
+
+    public IslandUtils getIslandUtils() {
+        return islandUtils;
+    }
+
 }
