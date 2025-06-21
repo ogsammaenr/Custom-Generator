@@ -1,0 +1,4 @@
+name: CustomGenerator
+version: '1.0-SNAPSHOT'
+main: xanth.ogsammaenr.customGenerator.CustomGenerator
+api-version: '1.21'
