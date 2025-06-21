@@ -2,3 +2,10 @@ name: CustomGenerator
 version: '1.0-SNAPSHOT'
 main: xanth.ogsammaenr.customGenerator.CustomGenerator
 api-version: '1.21'
+
+depend:
+  - BentoBox
+  - Vault
+
+authors: [ ogsammaenr ]
+description: Oyuncuların ada seviyesine göre jeneratörleri satın almasını sağlayan özel kırıktaş jeneratörü eklentisi.
