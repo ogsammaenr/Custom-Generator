@@ -1,5 +1,6 @@
 package xanth.ogsammaenr.customGenerator.storage;
 
+import org.bukkit.Bukkit;
 import xanth.ogsammaenr.customGenerator.CustomGenerator;
 import xanth.ogsammaenr.customGenerator.manager.IslandGeneratorManager;
 import xanth.ogsammaenr.customGenerator.model.GeneratorCategory;
@@ -19,6 +20,13 @@ public class IslandGeneratorDAO {
     public IslandGeneratorDAO(CustomGenerator plugin, DatabaseConnector connector) {
         this.plugin = plugin;
         this.connector = connector;
+
+        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
+            plugin.getLogger().info("Jeneratör verileri kaydediliyor...");
+            saveActiveGenerators(plugin.getIslandGeneratorManager());
+            saveOwnedGenerators(plugin.getIslandGeneratorManager());
+
+        }, 0L, 5 * 60 * 20L);
     }
 
     ///     ----------------------------
