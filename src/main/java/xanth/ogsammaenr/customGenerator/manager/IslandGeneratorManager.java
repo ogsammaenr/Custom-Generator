@@ -114,4 +114,12 @@ public class IslandGeneratorManager {
         }
         return typeId;
     }
+
+    public Map<String, Set<String>> getOwnedGeneratorTypes() {
+        return ownedGeneratorTypes;
+    }
+
+    public Map<String, Map<GeneratorCategory, String>> getActiveGeneratorTypes() {
+        return activeGeneratorTypes;
+    }
 }
