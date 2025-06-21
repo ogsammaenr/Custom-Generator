@@ -1,0 +1,39 @@
+generator-types:
+  coal:
+    display-name: "&7Kömür Jeneratörü"
+    material: COAL_ORE
+    lore:
+      - "&8Basit bir jeneratör tipi."
+      - "&7%60 taş, %40 kömür üretir."
+    generator-type: COBBLESTONE
+    price: 1000
+    required-island-level: 5
+    blocks:
+      STONE: 0.6
+      COAL_ORE: 0.4
+
+  iron:
+    display-name: "&fDemir Jeneratörü"
+    material: IRON_ORE
+    lore:
+      - "&7Orta seviye jeneratör."
+      - "&7%50 taş, %50 demir üretir."
+    generator-type: COBBLESTONE
+    price: 2500
+    required-island-level: 15
+    blocks:
+      STONE: 0.5
+      IRON_ORE: 0.5
+
+  diamond:
+    display-name: "&bElmas Jeneratörü"
+    material: DIAMOND_ORE
+    lore:
+      - "&bEn nadir kaynakları içerir."
+      - "&7%30 elmas, %70 taş üretir."
+    generator-type: COBBLESTONE
+    price: 5000
+    required-island-level: 30
+    blocks:
+      STONE: 0.7
+      DIAMOND_ORE: 0.3
