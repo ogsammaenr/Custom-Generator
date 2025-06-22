@@ -3,6 +3,7 @@ package xanth.ogsammaenr.customGenerator;
 import org.bukkit.plugin.java.JavaPlugin;
 import xanth.ogsammaenr.customGenerator.commands.GeneratorCommand;
 import xanth.ogsammaenr.customGenerator.listeners.GeneratorListener;
+import xanth.ogsammaenr.customGenerator.listeners.InventoryClickListener;
 import xanth.ogsammaenr.customGenerator.manager.EconomyManager;
 import xanth.ogsammaenr.customGenerator.manager.IslandGeneratorManager;
 import xanth.ogsammaenr.customGenerator.storage.DatabaseConnector;
@@ -24,6 +25,7 @@ public final class CustomGenerator extends JavaPlugin {
     private IslandUtils islandUtils;
 
     private GeneratorListener generatorListener;
+    private InventoryClickListener inventoryClickListener;
 
     @Override
     public void onEnable() {
@@ -33,9 +35,12 @@ public final class CustomGenerator extends JavaPlugin {
 
         saveDefaultConfig();
 
+        this.databaseConnector = new SQLiteConnector(this);
+        this.islandGeneratorDAO = new IslandGeneratorDAO(this, databaseConnector);
+
         ///========== Manager sınıfları ==========
         economyManager = new EconomyManager(this);
-        islandGeneratorManager = new IslandGeneratorManager(this);
+        islandGeneratorManager = new IslandGeneratorManager(this, islandGeneratorDAO);
 
         if (!economyManager.setupEconomy()) {
             getLogger().severe("Vault ekonomisi bulunamadı! Plugin kapatılıyor.");
@@ -45,10 +50,7 @@ public final class CustomGenerator extends JavaPlugin {
 
         ///========== Veri Yükleme ==========
         this.typeLoader = new GeneratorTypeLoader(this);
-        this.databaseConnector = new SQLiteConnector(this);
-        this.islandGeneratorDAO = new IslandGeneratorDAO(this, databaseConnector);
 
-        
         typeLoader.loadGeneratorTypes();
         islandGeneratorDAO.loadAll(islandGeneratorManager);
 
@@ -57,7 +59,10 @@ public final class CustomGenerator extends JavaPlugin {
 
         ///========== listener Kayıtları =========
         generatorListener = new GeneratorListener();
+        inventoryClickListener = new InventoryClickListener(this);
+        
         getServer().getPluginManager().registerEvents(generatorListener, this);
+        getServer().getPluginManager().registerEvents(inventoryClickListener, this);
 
         getLogger().info("***** CustomGenerator is enabled *****");
     }

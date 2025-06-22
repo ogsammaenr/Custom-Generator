@@ -35,10 +35,13 @@ public class SQLiteConnector implements DatabaseConnector {
         }
     }
 
+    /**
+     * @return {@code Connection}
+     * @throws SQLException
+     */
     @Override
     public Connection getConnection() throws SQLException {
         if (this.connection == null || this.connection.isClosed()) {
-            plugin.getLogger().warning("Bağlantı kapalı! Yeni bağlantı oluşturuluyor...");
             connect();
         }
         return this.connection;

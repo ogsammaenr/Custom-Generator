@@ -3,23 +3,26 @@ package xanth.ogsammaenr.customGenerator.manager;
 import xanth.ogsammaenr.customGenerator.CustomGenerator;
 import xanth.ogsammaenr.customGenerator.model.GeneratorCategory;
 import xanth.ogsammaenr.customGenerator.model.GeneratorType;
+import xanth.ogsammaenr.customGenerator.storage.IslandGeneratorDAO;
 
 import java.util.*;
 
 public class IslandGeneratorManager {
     private final CustomGenerator plugin;
+    private final IslandGeneratorDAO dao;
 
     /// Ada ID → Kategori → Aktif jeneratör tipi ID
     private final Map<String, Map<GeneratorCategory, String>> activeGeneratorTypes = new HashMap<>();
 
-    /// Ada ID → Satın alınan jeneratör tipi ID’leri
+    /// Ada ID → Satın alınan jeneratör tipi ID
     private final Map<String, Set<String>> ownedGeneratorTypes = new HashMap<>();
 
     /// Tanımlı jeneratör tipleri
     private final Map<String, GeneratorType> registeredTypes = new HashMap<>();
 
-    public IslandGeneratorManager(CustomGenerator plugin) {
+    public IslandGeneratorManager(CustomGenerator plugin, IslandGeneratorDAO islandGeneratorDAO) {
         this.plugin = plugin;
+        this.dao = islandGeneratorDAO;
     }
 
     // ==========================
@@ -52,7 +55,7 @@ public class IslandGeneratorManager {
     /// Ada belirli bir jeneratör tipine sahip mi?
     public boolean islandOwnsType(String islandId, String typeId) {
         return ownedGeneratorTypes.containsKey(islandId)
-                && ownedGeneratorTypes.get(islandId).contains(typeId);
+               && ownedGeneratorTypes.get(islandId).contains(typeId);
     }
 
     /// Adanın sahip olduğu jeneratör tiplerini getir
@@ -74,6 +77,7 @@ public class IslandGeneratorManager {
     public Map<GeneratorCategory, String> getActiveTypes(String islandId) {
         return activeGeneratorTypes.getOrDefault(islandId, Collections.emptyMap());
     }
+
 
     // ==========================
     // = Jeneratör tipi işlemleri =
@@ -122,4 +126,6 @@ public class IslandGeneratorManager {
     public Map<String, Map<GeneratorCategory, String>> getActiveGeneratorTypes() {
         return activeGeneratorTypes;
     }
+
+
 }

@@ -1,21 +1,23 @@
 package xanth.ogsammaenr.customGenerator.model;
 
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import xanth.ogsammaenr.customGenerator.util.ItemBuilder;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class GeneratorType {
-    private final String id; // Örn: "coal"
-    private final String displayName; // Menüde gösterilecek isim
-    private final Material icon; // Menüdeki ikon (örn: COAL_ORE)
-    private final List<String> lore; // Menü açıklaması
-    private final GeneratorCategory generatorCategory; // COBBLESTONE / STONE / BASALT
-    private final double price; // Vault ile satın alma bedeli
-    private final int requiredIslandLevel; // Gereken ada seviyesi
-    private final Map<Material, Double> blockChances; // Blok oranları
-    private int priority; // Yükleme sırasına göre atanacak (otomatik)
+    private final String id;
+    private final String displayName;
+    private final Material icon;
+    private final List<String> lore;
+    private final GeneratorCategory generatorCategory;
+    private final double price;
+    private final int requiredIslandLevel;
+    private final Map<Material, Double> blockChances;
+    private int priority;
 
     public GeneratorType(
             String id,
@@ -34,30 +36,50 @@ public class GeneratorType {
         this.generatorCategory = generatorCategory;
         this.price = price;
         this.requiredIslandLevel = requiredIslandLevel;
-        this.blockChances = new LinkedHashMap<>(blockChances); // Sıralı tutmak için LinkedHashMap
+        this.blockChances = new LinkedHashMap<>(blockChances);
     }
 
-    // Getters
+    /// Getters
+    /// -
+
+    /**
+     * @return Generator Id
+     */
     public String getId() {
         return id;
     }
 
+    /**
+     * @return Generator Display Name
+     */
     public String getDisplayName() {
         return displayName;
     }
 
+    /**
+     * @return Display Material
+     */
     public Material getIcon() {
         return icon;
     }
 
+    /**
+     * @return Display Item Lore
+     */
     public List<String> getLore() {
         return lore;
     }
 
+    /**
+     * @return Generator Category (Enum)
+     */
     public GeneratorCategory getGeneratorCategory() {
         return generatorCategory;
     }
 
+    /**
+     * @return Generator Type Price
+     */
     public double getPrice() {
         return price;
     }
@@ -74,22 +96,31 @@ public class GeneratorType {
         return priority;
     }
 
+    /// ------
     public void setPriority(int priority) {
         this.priority = priority;
+    }
+
+    public ItemStack buildItem() {
+        return new ItemBuilder(icon)
+                .setDisplayName(displayName)
+                .setLore(lore)
+                .setNBT("generator_id", id)
+                .build();
     }
 
     @Override
     public String toString() {
         return "GeneratorType{" +
-                "id='" + id + '\'' +
-                ", displayName='" + displayName + '\'' +
-                ", icon=" + icon +
-                ", lore=" + lore +
-                ", generatorCategory=" + generatorCategory +
-                ", price=" + price +
-                ", requiredIslandLevel=" + requiredIslandLevel +
-                ", blockChances=" + blockChances +
-                ", priority=" + priority +
-                '}';
+               "id='" + id + '\'' +
+               ", displayName='" + displayName + '\'' +
+               ", icon=" + icon +
+               ", lore=" + lore +
+               ", generatorCategory=" + generatorCategory +
+               ", price=" + price +
+               ", requiredIslandLevel=" + requiredIslandLevel +
+               ", blockChances=" + blockChances +
+               ", priority=" + priority +
+               '}';
     }
 }

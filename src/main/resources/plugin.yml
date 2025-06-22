@@ -2,6 +2,8 @@ name: CustomGenerator
 version: '1.0-SNAPSHOT'
 main: xanth.ogsammaenr.customGenerator.CustomGenerator
 api-version: '1.21'
+authors: [ ogsammaenr ]
+description: Oyuncuların ada seviyesine göre jeneratörleri satın almasını sağlayan özel kırıktaş jeneratörü eklentisi.
 
 depend:
   - BentoBox
@@ -12,5 +14,7 @@ commands:
     description: Custom Generator Ana Komudu
     usage: /generator
 
-authors: [ ogsammaenr ]
-description: Oyuncuların ada seviyesine göre jeneratörleri satın almasını sağlayan özel kırıktaş jeneratörü eklentisi.
+permissions:
+  customgenerator.admin:
+    description: Admin Commands
+    default: op

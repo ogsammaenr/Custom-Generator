@@ -1,5 +1,6 @@
 package xanth.ogsammaenr.customGenerator.storage;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -12,6 +13,7 @@ import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class GeneratorTypeLoader {
     private final CustomGenerator plugin;
@@ -42,6 +44,7 @@ public class GeneratorTypeLoader {
             if (genSec == null) continue;
 
             String displayName = genSec.getString("display-name", id);
+            String coloredDisplayName = ChatColor.translateAlternateColorCodes('&', displayName);
             String materialName = genSec.getString("material", "STONE");
             Material material = Material.matchMaterial(materialName.toUpperCase());
             if (material == null) {
@@ -50,6 +53,9 @@ public class GeneratorTypeLoader {
             }
 
             List<String> lore = genSec.getStringList("lore");
+            List<String> coloredLore = lore.stream()
+                    .map(line -> ChatColor.translateAlternateColorCodes('&', line))
+                    .collect(Collectors.toList());
             String categoryName = genSec.getString("generator-type", "COBBLESTONE").toUpperCase();
             GeneratorCategory category;
             try {
@@ -83,9 +89,9 @@ public class GeneratorTypeLoader {
             // Oranların toplamı kontrol edilebilir, istersen eklenecek
             GeneratorType type = new GeneratorType(
                     id,
-                    displayName,
+                    coloredDisplayName,
                     material,
-                    lore,
+                    coloredLore,
                     category,
                     price,
                     requiredLevel,
