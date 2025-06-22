@@ -57,7 +57,7 @@ public class GeneratorMenu {
         }
 
         //  ********** Generator Category Items *********
-        int categoryIndex = 3;
+        int categoryIndex = 2;
         for (GeneratorCategory category : GeneratorCategory.values()) {
             ItemStack item = new ItemBuilder(Material.valueOf(category.name()))
                     .setDisplayName(ChatColor.YELLOW + category.name().replace("_", " ").toLowerCase())
@@ -65,7 +65,7 @@ public class GeneratorMenu {
                     .build();
             if (selectedCategory == category) {
                 item = new ItemBuilder(item)
-                        .addEnchant(Enchantment.EFFICIENCY, 1)
+                        .addEnchant(Enchantment.MENDING, 1)
                         .addFlags(ItemFlag.HIDE_ENCHANTS)
                         .build();
             }
@@ -79,11 +79,11 @@ public class GeneratorMenu {
                 .build();
         if (selectedCategory == null) {
             allCategory = new ItemBuilder(allCategory)
-                    .addEnchant(Enchantment.EFFICIENCY, 1)
+                    .addEnchant(Enchantment.MENDING, 1)
                     .addFlags(ItemFlag.HIDE_ENCHANTS)
                     .build();
         }
-        gui.setItem(7, allCategory);
+        gui.setItem(6, allCategory);
 
         if (selectedCategory != null) {
             gui.setItem(40, new ItemBuilder(Material.RED_CANDLE)
@@ -120,7 +120,7 @@ public class GeneratorMenu {
             }
 
             if (isActive) {
-                builder.addEnchant(Enchantment.FORTUNE, 1);
+                builder.addEnchant(Enchantment.MENDING, 1);
                 builder.addFlags(ItemFlag.HIDE_ENCHANTS);
             }
 

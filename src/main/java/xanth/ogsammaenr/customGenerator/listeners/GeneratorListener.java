@@ -34,7 +34,7 @@ public class GeneratorListener implements Listener {
         if (!(type == Material.COBBLESTONE || type == Material.STONE || type == Material.BASALT)) {
             return; // İlgili değilse işlem yapma
         }
-        
+
         Block block = event.getBlock();
         Location loc = block.getLocation();
         World world = block.getWorld();
@@ -48,6 +48,12 @@ public class GeneratorListener implements Listener {
         if (generatorType == null) {
             return;
         }
+        if (type == Material.STONE
+            && loc.getBlockY() < 0
+            && islandGeneratorManager.getGeneratorType(island.getUniqueId(), GeneratorCategory.DEEPSLATE) != null) {
+            generatorType = islandGeneratorManager.getGeneratorType(island.getUniqueId(), GeneratorCategory.DEEPSLATE);
+        }
+
         event.setCancelled(true);
 
         // Blok listesinden rastgele bir blok seç
