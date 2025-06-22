@@ -40,7 +40,6 @@ public class InventoryClickListener implements Listener {
     public void onInventoryClick(InventoryClickEvent e) {
         if (!(e.getWhoClicked() instanceof Player player)) return;
         if (!e.getView().getTitle().startsWith("Ada Jeneratörleri")) {
-            System.out.println("buraya girildi ************************");
             return;
         }
 
