@@ -60,7 +60,7 @@ public final class CustomGenerator extends JavaPlugin {
         ///========== listener Kayıtları =========
         generatorListener = new GeneratorListener();
         inventoryClickListener = new InventoryClickListener(this);
-        
+
         getServer().getPluginManager().registerEvents(generatorListener, this);
         getServer().getPluginManager().registerEvents(inventoryClickListener, this);
 
@@ -69,8 +69,11 @@ public final class CustomGenerator extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        islandGeneratorDAO.saveToJson(islandGeneratorManager);
+
         islandGeneratorDAO.saveOwnedGenerators(islandGeneratorManager);
         islandGeneratorDAO.saveActiveGenerators(islandGeneratorManager);
+
         databaseConnector.close();
 
 

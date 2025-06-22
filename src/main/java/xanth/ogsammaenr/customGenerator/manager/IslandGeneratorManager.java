@@ -74,6 +74,37 @@ public class IslandGeneratorManager {
         ownedGeneratorTypes.get(islandId).add(typeId);
     }
 
+    /// Belirli bir adadaki belirli bir kategorideki jeneratör bilgisini kaldırır
+    public void removeGeneratorType(String islandId, GeneratorCategory category) {
+        Map<GeneratorCategory, String> categoryMap = activeGeneratorTypes.get(islandId);
+        if (categoryMap != null) {
+            categoryMap.remove(category);
+
+            // Eğer o adada hiç kategori kalmadıysa map'i tamamen kaldırabilirsin (opsiyonel)
+            if (categoryMap.isEmpty()) {
+                activeGeneratorTypes.remove(islandId);
+            }
+        }
+    }
+
+    /**
+     * Belirtilen ada ID'sinde, verilen jeneratör tipi aktif mi kontrol eder.
+     *
+     * @param islandId        Ada ID'si
+     * @param generatorTypeId Jeneratör tipi ID'si
+     * @return true → eğer bu jeneratör tipi o ada için aktifse
+     */
+    public boolean isGeneratorTypeActive(String islandId, String generatorTypeId) {
+        GeneratorType type = getRegisteredType(generatorTypeId);
+        if (type == null) return false;
+
+        Map<GeneratorCategory, String> activeTypes = activeGeneratorTypes.get(islandId);
+        if (activeTypes == null) return false;
+
+        String activeId = activeTypes.get(type.getGeneratorCategory());
+        return generatorTypeId.equals(activeId);
+    }
+
     public Map<GeneratorCategory, String> getActiveTypes(String islandId) {
         return activeGeneratorTypes.getOrDefault(islandId, Collections.emptyMap());
     }

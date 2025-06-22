@@ -172,7 +172,7 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
         generatorManager.setGeneratorType(islandId, typeId);
 
         player.sendMessage(ChatColor.GREEN + "Aktif " + ChatColor.GOLD + type.getGeneratorCategory().name() +
-                           ChatColor.GREEN + " jeneratör '" + type.getDisplayName() + "' olarak ayarlandı.");
+                           ChatColor.GREEN + " jeneratör '" + type.getDisplayName() + ChatColor.GREEN + "' olarak ayarlandı.");
     }
 
     /**

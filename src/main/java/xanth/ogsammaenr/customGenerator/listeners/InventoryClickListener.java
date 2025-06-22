@@ -1,6 +1,7 @@
 package xanth.ogsammaenr.customGenerator.listeners;
 
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -44,6 +45,10 @@ public class InventoryClickListener implements Listener {
         }
 
         e.setCancelled(true);
+        String[] parts = e.getView().getTitle().split(" ");
+        String selectedCategoryId = parts[parts.length - 1];
+        GeneratorCategory selectedCategory = selectedCategoryId.equals("ALL") ? null : GeneratorCategory.valueOf(selectedCategoryId);
+
 
         ItemStack clicked = e.getCurrentItem();
         if (clicked == null || clicked.getType() == Material.AIR) return;
@@ -51,6 +56,7 @@ public class InventoryClickListener implements Listener {
         String categoryId = getStringTag(clicked, "category");
         String is_owned = getStringTag(clicked, "is_owned");
         String generator_id = getStringTag(clicked, "generator_id");
+        String deactivate = getStringTag(clicked, "deactivate");
         if (categoryId != null) {
             if (categoryId.equals("ALL")) {
                 new GeneratorMenu(CustomGenerator.getInstance()).openMenu(player, null);
@@ -65,9 +71,15 @@ public class InventoryClickListener implements Listener {
             if (is_owned.equals("true")) {
                 manager.setGeneratorType(island.getUniqueId(), generator_id);
 
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    new GeneratorMenu(CustomGenerator.getInstance()).openMenu(player, selectedCategory);
+                }, 3L);
                 player.sendMessage(ChatColor.GREEN + "Aktif " + ChatColor.GOLD + type.getGeneratorCategory().name() +
-                                   ChatColor.GREEN + " jeneratör '" + type.getDisplayName() + "' olarak ayarlandı.");
+                                   ChatColor.GREEN + " jeneratörü '" + type.getDisplayName() + "' olarak ayarlandı.");
             } else {
+                if (manager.islandOwnsType(island.getUniqueId(), generator_id)) {
+                    return;
+                }
                 /*      Seviye Kontrolü     */
                 long level = islandUtils.getIslandLevel(player.getUniqueId(), player.getWorld().getName());
                 if (level < type.getRequiredIslandLevel()) {
@@ -84,8 +96,25 @@ public class InventoryClickListener implements Listener {
 
                 economy.withdrawPlayer(player, price);
                 manager.addOwnedType(island.getUniqueId(), generator_id);
+
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    new GeneratorMenu(CustomGenerator.getInstance()).openMenu(player, selectedCategory);
+                }, 3L);
+
                 player.sendMessage(ChatColor.GREEN + "Başarıyla '" + type.getDisplayName() + "' jeneratörünü satın aldınız. " + ChatColor.YELLOW + type.getPrice());
             }
+        } else if (deactivate != null) {
+            Island island = islandsManager.getOwnedIslands(player.getWorld(), player.getUniqueId()).stream().findFirst().orElse(null);
+
+            manager.removeGeneratorType(island.getUniqueId(), GeneratorCategory.valueOf(deactivate));
+
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                new GeneratorMenu(CustomGenerator.getInstance()).openMenu(player, GeneratorCategory.valueOf(deactivate));
+            }, 3L);
+
+            player.sendMessage(ChatColor.YELLOW + deactivate + ChatColor.GREEN + " Jeneratörü kaldırıldı");
+
+
         }
     }
 

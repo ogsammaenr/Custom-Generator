@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.database.objects.Island;
 import xanth.ogsammaenr.customGenerator.CustomGenerator;
@@ -17,6 +18,7 @@ import xanth.ogsammaenr.customGenerator.model.GeneratorType;
 import xanth.ogsammaenr.customGenerator.util.ItemBuilder;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class GeneratorMenu {
@@ -28,13 +30,14 @@ public class GeneratorMenu {
         this.manager = plugin.getIslandGeneratorManager();
     }
 
-    public void openMenu(Player player, GeneratorCategory selectedCategory) {
+    public void openMenu(Player player, @Nullable GeneratorCategory selectedCategory) {
         List<GeneratorType> types = manager.getAllRegisteredTypes().values().stream()
                 .filter(type -> selectedCategory == null || type.getGeneratorCategory() == selectedCategory)
                 .collect(Collectors.toList());
 
         int size = 5 * 9;
-        Inventory gui = Bukkit.createInventory(null, size, "Ada Jeneratörleri");
+        Inventory gui = Bukkit.createInventory(null, size, "Ada Jeneratörleri§8 - " + (selectedCategory == null ? "ALL" : selectedCategory.name()));
+
         //  ********** Filler Items **********
         ItemStack lineFiller = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE)
                 .setDisplayName("§7")
@@ -82,33 +85,46 @@ public class GeneratorMenu {
         }
         gui.setItem(7, allCategory);
 
+        if (selectedCategory != null) {
+            gui.setItem(40, new ItemBuilder(Material.RED_CANDLE)
+                    .setDisplayName("§7Jeneratörü kaldır")
+                    .setNBT("deactivate", selectedCategory.name())
+                    .build());
+        }
+
         //  **********  Generator Type Items **********
 
         int typeIndex = 9;
+        Island island = BentoBox.getInstance().getIslandsManager()
+                .getOwnedIslands(player.getWorld(), player.getUniqueId())
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+        String islandId = island.getUniqueId();
+        Set<String> ownedTypes = manager.getOwnedTypes(islandId);
         for (GeneratorType type : types) {
             if (typeIndex >= size) break;
-            ItemStack generatorTypeItem = type.buildItem();
-            Island island = BentoBox.getInstance().getIslandsManager()
-                    .getOwnedIslands(player.getWorld(), player.getUniqueId())
-                    .stream()
-                    .findFirst()
-                    .orElse(null);
 
-            if (manager.getOwnedTypes(island.getUniqueId()).contains(type.getId())) {
-                generatorTypeItem = new ItemBuilder(generatorTypeItem)
-                        .addLoreLine("")
-                        .addLoreLine("§7Aktifleştirmek için §etıklayın")
-                        .setNBT("is_owned", "true")
-                        .build();
+            ItemBuilder builder = new ItemBuilder(type.buildItem());
+            boolean isOwned = ownedTypes.contains(type.getId());
+            boolean isActive = manager.isGeneratorTypeActive(islandId, type.getId());
+
+            builder.addLoreLine("");
+            if (isOwned) {
+                builder.addLoreLine("§7Aktifleştirmek için §etıklayın");
+                builder.setNBT("is_owned", "true");
             } else {
-                generatorTypeItem = new ItemBuilder(generatorTypeItem)
-                        .addLoreLine("")
-                        .addLoreLine("§7Satın almak için §etıklayın")
-                        .setNBT("is_owned", "false")
-                        .build();
+                builder.addLoreLine("§7Satın almak için §etıklayın");
+                builder.setNBT("is_owned", "false");
             }
 
-            gui.setItem(typeIndex++, generatorTypeItem);
+            if (isActive) {
+                builder.addEnchant(Enchantment.FORTUNE, 1);
+                builder.addFlags(ItemFlag.HIDE_ENCHANTS);
+            }
+
+            gui.setItem(typeIndex++, builder.build());
         }
         player.openInventory(gui);
     }
