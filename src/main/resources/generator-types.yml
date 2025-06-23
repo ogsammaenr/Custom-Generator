@@ -1,39 +1,100 @@
+# ===========================================================
+#        ⚙️ GENERATOR TYPE DEFINITIONS - generator-types.yml
+#
+# This file defines all generator types available in the server.
+#
+# Each generator type can:
+# - Appear in the GUI with a name, icon, and description
+# - Require an island level and a price to be purchased
+# - Produce specific blocks with configurable chances
+# ===========================================================
+
 generator-types:
+
   coal:
-    display-name: "&7Kömür Jeneratörü"
-    material: COAL_ORE
-    lore:
-      - "&8Basit bir jeneratör tipi."
-      - "&7%60 taş, %40 kömür üretir."
-    generator-type: COBBLESTONE
-    price: 1000
-    required-island-level: 5
-    blocks:
-      STONE: 0.6
-      COAL_ORE: 0.4
+    display-name: "&7Coal Generator"                # Display name shown in the GUI
+    material: COAL_ORE                              # Icon material for the GUI (Bukkit Material)
+    lore: # Description shown in the GUI (optional)
+      - "&8A simple generator type."
+      - "&7Produces 60% stone and 40% coal."
+    generator-type: COBBLESTONE                     # Generator category (see category list below)
+    price: 1000                                     # Purchase cost (Vault economy)
+    required-island-level: 5                        # Minimum island level required to purchase
+    blocks: # Output block chances (relative weights)
+      STONE: 60
+      COAL_ORE: 40
 
   iron:
-    display-name: "&fDemir Jeneratörü"
+    display-name: "&fIron Generator"
     material: IRON_ORE
     lore:
-      - "&7Orta seviye jeneratör."
-      - "&7%50 taş, %50 demir üretir."
+      - "&7Mid-tier generator."
+      - "&7Produces 50% stone and 50% iron."
     generator-type: COBBLESTONE
     price: 2500
     required-island-level: 15
     blocks:
-      STONE: 0.5
-      IRON_ORE: 0.5
+      STONE: 5
+      IRON_ORE: 5
 
   diamond:
-    display-name: "&bElmas Jeneratörü"
+    display-name: "&bDiamond Generator"
     material: DIAMOND_ORE
     lore:
-      - "&bEn nadir kaynakları içerir."
-      - "&7%30 elmas, %70 taş üretir."
+      - "&bContains the rarest resources."
+      - "&7Produces 30% diamond and 70% stone."
     generator-type: COBBLESTONE
     price: 5000
     required-island-level: 30
     blocks:
       STONE: 0.7
       DIAMOND_ORE: 0.3
+
+
+# ===========================================================
+# 📘 EXPLANATIONS
+# ===========================================================
+
+# 🔹 generator-type:
+# The category this generator belongs to.
+# Must be one of the following (case-insensitive):
+#
+#   - COBBLESTONE : Classic cobblestone generation
+#   - STONE       : Classic stone generation
+#   - BASALT      : Lava + blue ice + soul soil
+#   - DEEPSLATE   : Classic stone generation but under 0 y levels
+#
+# Categories are used to organize and filter generators in the GUI.
+
+# 🔹 blocks:
+# Defines the output blocks and their respective chances.
+#
+# You are NOT required to use normalized values (they don't need to add up to 1).
+# These are treated as **relative weights**.
+#
+# Examples:
+#   STONE: 70
+#   DIAMOND_ORE: 30
+# or
+#   STONE: 0.7
+#   DIAMOND_ORE: 0.3
+# or
+#   STONE: 7
+#   DIAMOND_ORE: 3
+#
+# All are valid — the system automatically normalizes the values internally.
+
+# 🔹 material:
+# The icon that will be shown in the GUI. Use valid Bukkit Material names.
+
+# 🔹 display-name:
+# The colored name shown in the GUI for this generator type.
+
+# 🔹 lore:
+# A list of lines describing this generator, shown in the GUI.
+
+# 🔹 required-island-level:
+# The minimum BentoBox island level required to purchase this generator.
+
+# 🔹 price:
+# Cost to buy this generator (uses Vault economy). Supports decimals.

@@ -27,8 +27,6 @@ public class IslandGeneratorDAO {
         this.connector = connector;
 
         Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
-            plugin.getLogger().info("Jeneratör verileri kaydediliyor...");
-
             saveToJson(plugin.getIslandGeneratorManager());
 
             clearAllActiveGenerators();
