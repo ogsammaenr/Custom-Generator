@@ -185,7 +185,8 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        plugin.reloadConfig(); // config.yml gibi dosyaları yeniden yükler
+        plugin.reloadConfig();
+        plugin.getTypeLoader().loadGeneratorTypes();
 
         player.sendMessage(ChatColor.GREEN + "CustomGenerator başarıyla yeniden yüklendi.");
     }

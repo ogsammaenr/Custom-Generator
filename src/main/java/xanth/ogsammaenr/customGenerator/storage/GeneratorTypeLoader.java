@@ -38,6 +38,8 @@ public class GeneratorTypeLoader {
             return;
         }
 
+        manager.getAllRegisteredTypes().clear();
+
         int priority = 0;
         for (String id : section.getKeys(false)) {
             ConfigurationSection genSec = section.getConfigurationSection(id);
@@ -86,7 +88,6 @@ public class GeneratorTypeLoader {
                 blockChances.put(blockType, chance);
             }
 
-            // Oranların toplamı kontrol edilebilir, istersen eklenecek
             GeneratorType type = new GeneratorType(
                     id,
                     coloredDisplayName,
@@ -104,7 +105,7 @@ public class GeneratorTypeLoader {
             plugin.getLogger().info(type.toString());
             plugin.getLogger().info("==============================");
         }
-        plugin.getLogger().info("==============================");
+
         plugin.getLogger().info(priority + " jeneratör tipi yüklendi.");
         plugin.getLogger().info("==============================");
     }

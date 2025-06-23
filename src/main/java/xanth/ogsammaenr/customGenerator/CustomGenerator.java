@@ -96,4 +96,7 @@ public final class CustomGenerator extends JavaPlugin {
         return islandUtils;
     }
 
+    public GeneratorTypeLoader getTypeLoader() {
+        return typeLoader;
+    }
 }
