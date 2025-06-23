@@ -6,6 +6,7 @@ import xanth.ogsammaenr.customGenerator.listeners.GeneratorListener;
 import xanth.ogsammaenr.customGenerator.listeners.InventoryClickListener;
 import xanth.ogsammaenr.customGenerator.manager.EconomyManager;
 import xanth.ogsammaenr.customGenerator.manager.IslandGeneratorManager;
+import xanth.ogsammaenr.customGenerator.manager.MessagesManager;
 import xanth.ogsammaenr.customGenerator.storage.DatabaseConnector;
 import xanth.ogsammaenr.customGenerator.storage.GeneratorTypeLoader;
 import xanth.ogsammaenr.customGenerator.storage.IslandGeneratorDAO;
@@ -17,6 +18,7 @@ public final class CustomGenerator extends JavaPlugin {
 
     private EconomyManager economyManager;
     private IslandGeneratorManager islandGeneratorManager;
+    private MessagesManager messagesManager;
 
     private GeneratorTypeLoader typeLoader;
     private DatabaseConnector databaseConnector;
@@ -41,6 +43,7 @@ public final class CustomGenerator extends JavaPlugin {
         ///========== Manager sınıfları ==========
         economyManager = new EconomyManager(this);
         islandGeneratorManager = new IslandGeneratorManager(this, islandGeneratorDAO);
+        messagesManager = new MessagesManager(this);
 
         if (!economyManager.setupEconomy()) {
             getLogger().severe("Vault ekonomisi bulunamadı! Plugin kapatılıyor.");
@@ -98,5 +101,9 @@ public final class CustomGenerator extends JavaPlugin {
 
     public GeneratorTypeLoader getTypeLoader() {
         return typeLoader;
+    }
+
+    public MessagesManager getMessagesManager() {
+        return messagesManager;
     }
 }

@@ -16,6 +16,7 @@ import world.bentobox.bentobox.managers.IslandsManager;
 import xanth.ogsammaenr.customGenerator.CustomGenerator;
 import xanth.ogsammaenr.customGenerator.gui.GeneratorMenu;
 import xanth.ogsammaenr.customGenerator.manager.IslandGeneratorManager;
+import xanth.ogsammaenr.customGenerator.manager.MessagesManager;
 import xanth.ogsammaenr.customGenerator.model.GeneratorType;
 import xanth.ogsammaenr.customGenerator.util.IslandUtils;
 
@@ -28,6 +29,7 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
     private final Economy economy;
     private final IslandsManager islandsManager;
     private final IslandUtils islandUtils;
+    private final MessagesManager messages;
 
     private static final List<String> SUB_COMMANDS = List.of("reload", "list", "info", "buy", "activate");
 
@@ -38,6 +40,7 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
         this.economy = plugin.getEconomyManager().getEconomy();
         this.islandsManager = BentoBox.getInstance().getIslandsManager();
         this.islandUtils = plugin.getIslandUtils();
+        this.messages = plugin.getMessagesManager();
     }
 
     /**
@@ -71,22 +74,19 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    /**
-     * @param player Command Sender
-     * @param args   Command
-     */
     private void handleBuyCommand(Player player, String[] args) {
         if (args.length < 2) {
-            player.sendMessage(ChatColor.RED + "Kullanım: /generator buy <type>");
+            player.sendMessage(messages.get("commands.buy.usage"));
             return;
         }
 
         player.sendMessage(generatorManager.getRegisteredTypeString());
 
+        /*      Tip Kontrolü*/
         String typeId = args[1].toLowerCase();
         GeneratorType type = generatorManager.getRegisteredType(typeId);
         if (type == null) {
-            player.sendMessage(ChatColor.RED + "Bilinmeyen jeneratör tipi: " + typeId);
+            player.sendMessage(messages.getFormatted("commands.general.unknown-type", Map.of("generator", typeId)));
             return;
         }
 
@@ -94,49 +94,45 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
         World world = player.getWorld();
         String worldName = world.getName();
         if (!worldName.equals("bskyblock_world") && !worldName.equals("bskyblock_world_nether") && !worldName.equals("bskyblock_world_the_end")) {
-            player.sendMessage(ChatColor.YELLOW + "adalar dünyasında değilsin");
+            player.sendMessage(messages.get("commands.general.not-in-island-world"));
         }
 
         /*      Ada Kontrolü        */
         Island island = islandsManager.getOwnedIslands(world, player.getUniqueId()).stream().findFirst().orElse(null);
         if (island == null) {
-            player.sendMessage(ChatColor.RED + "Bir adaya sahip değilsiniz.");
+            player.sendMessage(messages.get("commands.general.no-island"));
             return;
         }
 
         /*      Sahiplik Kontrolü       */
         String islandId = island.getUniqueId();
         if (generatorManager.islandOwnsType(islandId, typeId)) {
-            player.sendMessage(ChatColor.YELLOW + "Zaten bu jeneratör tipine sahipsiniz.");
+            player.sendMessage(messages.get("commands.buy.already-owned"));
             return;
         }
 
         /*      Seviye Kontrolü     */
         long level = islandUtils.getIslandLevel(player.getUniqueId(), worldName);
         if (level < type.getRequiredIslandLevel()) {
-            player.sendMessage(ChatColor.RED + "Bu jeneratörü satın almak için gereken ada seviyesi: " + type.getRequiredIslandLevel());
+            player.sendMessage(messages.getFormatted("commands.buy.not-enough-level", Map.of("required_level", String.valueOf(type.getRequiredIslandLevel()))));
             return;
         }
 
         /*      Para Kontrolü       */
         double price = type.getPrice();
         if (!economy.has(player, price)) {
-            player.sendMessage(ChatColor.RED + "Bu jeneratörü satın almak için yeterli paranız yok. Gerekli: " + price);
+            player.sendMessage(messages.getFormatted("commands.buy.not-enough-money", Map.of("price", String.valueOf(price))));
             return;
         }
 
         economy.withdrawPlayer(player, price);
         generatorManager.addOwnedType(islandId, typeId);
-        player.sendMessage(ChatColor.GREEN + "Başarıyla '" + type.getDisplayName() + "' jeneratörünü satın aldınız. " + ChatColor.YELLOW + type.getPrice());
+        player.sendMessage(messages.getFormatted("commands.buy.success", Map.of("generator", type.getDisplayName(), "price", String.valueOf(price))));
     }
 
-    /**
-     * @param player Command Sender
-     * @param args   Command
-     */
     private void handleActivateCommand(Player player, String[] args) {
         if (args.length < 2) {
-            player.sendMessage(ChatColor.RED + "Kullanım: /generator activate <type>");
+            player.sendMessage(messages.get("commands.activate.usage"));
             return;
         }
 
@@ -144,63 +140,54 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
         World world = player.getWorld();
         String worldName = world.getName();
         if (!worldName.equals("bskyblock_world") && !worldName.equals("bskyblock_world_nether") && !worldName.equals("bskyblock_world_the_end")) {
-            player.sendMessage(ChatColor.YELLOW + "adalar dünyasında değilsin");
+            player.sendMessage(messages.get("commands.general.no-island"));
         }
 
         /*      Tip Kontrolü        */
         String typeId = args[1].toLowerCase();
         GeneratorType type = generatorManager.getRegisteredType(typeId);
         if (type == null) {
-            player.sendMessage(ChatColor.RED + "Bilinmeyen jeneratör tipi: " + typeId);
+            player.sendMessage(messages.getFormatted("commands.general.unknown-type", Map.of("generator", typeId)));
             return;
         }
 
         /*      Ada Kontolü     */
         Island island = islandsManager.getOwnedIslands(world, player.getUniqueId()).stream().findFirst().orElse(null);
         if (island == null) {
-            player.sendMessage(ChatColor.RED + "Bir adaya sahip değilsiniz.");
+            player.sendMessage(messages.get("commands.general.no-island"));
             return;
         }
 
         /*      Sahiplik Kontorlü       */
         String islandId = island.getUniqueId();
         if (!generatorManager.islandOwnsType(islandId, typeId)) {
-            player.sendMessage(ChatColor.RED + "Bu jeneratör tipine sahip değilsiniz.");
+            player.sendMessage(messages.getFormatted("commands.activate.not-owned", Map.of("generator", typeId)));
             return;
         }
 
         generatorManager.setGeneratorType(islandId, typeId);
 
-        player.sendMessage(ChatColor.GREEN + "Aktif " + ChatColor.GOLD + type.getGeneratorCategory().name() +
-                           ChatColor.GREEN + " jeneratör '" + type.getDisplayName() + ChatColor.GREEN + "' olarak ayarlandı.");
+        player.sendMessage(messages.getFormatted("commands.activate.success", Map.of("category", type.getGeneratorCategory().getDisplayName(), "generator", type.getDisplayName())));
     }
 
-    /**
-     * @param player Command sender
-     * @param args   Command
-     */
     private void handleReloadCommand(Player player, String[] args) {
         if (!player.hasPermission("customgenerator.reload")) {
-            player.sendMessage(ChatColor.RED + "Bu komutu kullanmak için yetkiniz yok.");
+            player.sendMessage(messages.get("commands.general.no-permission"));
             return;
         }
 
         plugin.reloadConfig();
         plugin.getTypeLoader().loadGeneratorTypes();
+        messages.reload();
 
-        player.sendMessage(ChatColor.GREEN + "CustomGenerator başarıyla yeniden yüklendi.");
+        player.sendMessage(messages.get("commands.reload.success"));
     }
 
-    /**
-     * @param player Command Sender
-     * @param args   Command
-     */
     private void handleListCommand(Player player, String[] args) {
-        player.sendMessage(ChatColor.GOLD + "Kayıtlı Jeneratör Tipleri:");
+        player.sendMessage(messages.get("commands.list.header"));
         for (Map.Entry<String, GeneratorType> entry : generatorManager.getAllRegisteredTypes().entrySet()) {
             GeneratorType type = entry.getValue();
-            player.sendMessage(ChatColor.YELLOW + "- " + type.getId() + ChatColor.GRAY +
-                               " (Kategori: " + type.getGeneratorCategory().name() + ")");
+            player.sendMessage(messages.getFormatted("commands.list.entry", Map.of("generator", type.getDisplayName(), "category", type.getGeneratorCategory().getDisplayName())));
         }
     }
 
@@ -209,16 +196,19 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
      * @param args   Command
      */
     private void handleHelpCommand(Player player, String[] args) {
-        player.sendMessage("§8§m----------------------------------------");
-        player.sendMessage("§b§lCustomGenerator &7- Help Menu");
-        player.sendMessage("&e/generator buy <generatorType> &7- jeneratör tipini satın alır");
-        player.sendMessage("&e/generator activate <generatorType> &7- jeneratör tipini aktifleştirir");
-        player.sendMessage("&e/generator list &7- sunucuda tanımli olan jeneratör tiplerini gösterir");
-        player.sendMessage("&e/generator help &7- bu sayfayı açar");
-        if (player.hasPermission("customgenerator.admin")) {
-            player.sendMessage("&e/generator reload &7- config dosyalarını yeniden yükler");
+        player.sendMessage(messages.get("help.header-top"));
+        player.sendMessage(messages.get("help.header-title"));
+
+        List<String> entries = plugin.getMessagesManager().getConfig().getStringList("help.entries");
+
+        for (String line : entries) {
+            if (line.contains("reload") && !player.hasPermission("customgenerator.admin")) {
+                continue;
+            }
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', line));
         }
-        player.sendMessage("§8§m----------------------------------------");
+
+        player.sendMessage(messages.get("help.footer-bottom"));
     }
 
     private void handleGeneratorCommand(Player player) {
@@ -226,13 +216,13 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
         World world = player.getWorld();
         String worldName = world.getName();
         if (!worldName.equals("bskyblock_world") && !worldName.equals("bskyblock_world_nether") && !worldName.equals("bskyblock_world_the_end")) {
-            player.sendMessage(ChatColor.YELLOW + "adalar dünyasında değilsin");
+            player.sendMessage(messages.get("commands.general.no-island"));
         }
 
         /*      Ada Kontrolü        */
         Island island = islandsManager.getOwnedIslands(world, player.getUniqueId()).stream().findFirst().orElse(null);
         if (island == null) {
-            player.sendMessage(ChatColor.RED + "Bir adaya sahip değilsiniz.");
+            player.sendMessage(messages.get("commands.general.no-island"));
             return;
         }
 

@@ -39,8 +39,8 @@ public class GeneratorType {
         this.blockChances = new LinkedHashMap<>(blockChances);
     }
 
-    /// Getters
-    /// -
+    /*/ Getters /*/
+
 
     /**
      * @return Generator Id

@@ -1,0 +1,49 @@
+commands:
+  general:
+    not-in-island-world: "&eAdalar dünyasında değilsin"
+    no-island: "&cBir adaya sahip değilsiniz."
+    unknown-type: "&cBilinmeyen jeneratör tipi: %generator%"
+    no-permission: "&cBu komutu kullanmak için yetkiniz yok."
+
+  buy:
+    usage: "&cKullanım: /generator buy <type>"
+    already-owned: "&eZaten bu jeneratör tipine sahipsiniz."
+    not-enough-level: "&cBu jeneratörü satın almak için gereken ada seviyesi: %required_level%"
+    not-enough-money: "&cBu jeneratörü satın almak için yeterli paranız yok. Gerekli: %price%"
+    success: "&aBaşarıyla '%generator%' jeneratörünü satın aldınız. &e%price%"
+
+  activate:
+    usage: "&cKullanım: /generator activate <type>"
+    success: "&aAktif &e%category% &aJeneratörü %generator% &a olarak ayarlandı"
+    not-owned: "&cBu jeneratör tipine sahip değilsiniz. : %generator%"
+
+  reload:
+    success: "&aCustomGenerator başarıyla yeniden yüklendi."
+
+  list:
+    header: "&6Kayıtlı Jeneratör Tipleri:"
+    entry: "&e- %generator% &7(Kategori: %category%)"
+
+  help:
+    header-top: "&8&m----------------------------------------"
+    header-title: "&b&lCustomGenerator &7- Help Menu"
+    entries:
+      - "&e/generator buy <generatorType> &7- jeneratör tipini satın alır"
+      - "&e/generator activate <generatorType> &7- jeneratör tipini aktifleştirir"
+      - "&e/generator list &7- sunucuda tanımlı olan jeneratör tiplerini gösterir"
+      - "&e/generator help &7- bu sayfayı açar"
+      - "&e/generator reload &7- config dosyalarını yeniden yükler"
+    footer-bottom: "&8&m----------------------------------------"
+
+gui:
+  title: "Ada Jeneratörleri"
+  remove-button: "&7Jeneratörü kaldır"
+  click-to-activate: "&7Aktifleştirmek için &etıklayın"
+  click-to-buy: "&7Satın almak için &etıklayın"
+  deactivate: "&e%category_display% &aJeneratörü Kaldırıldı"
+
+generator-category:
+  cobblestone: "&7Kırıktaş"
+  stone: "&fTaş"
+  basalt: "&8Bazalt"
+  deepslate: "&3Derin Kayraktaşı"

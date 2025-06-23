@@ -13,6 +13,7 @@ import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.database.objects.Island;
 import xanth.ogsammaenr.customGenerator.CustomGenerator;
 import xanth.ogsammaenr.customGenerator.manager.IslandGeneratorManager;
+import xanth.ogsammaenr.customGenerator.manager.MessagesManager;
 import xanth.ogsammaenr.customGenerator.model.GeneratorCategory;
 import xanth.ogsammaenr.customGenerator.model.GeneratorType;
 import xanth.ogsammaenr.customGenerator.util.ItemBuilder;
@@ -24,10 +25,12 @@ import java.util.stream.Collectors;
 public class GeneratorMenu {
     private final CustomGenerator plugin;
     private final IslandGeneratorManager manager;
+    private final MessagesManager messages;
 
     public GeneratorMenu(CustomGenerator plugin) {
         this.plugin = plugin;
         this.manager = plugin.getIslandGeneratorManager();
+        this.messages = plugin.getMessagesManager();
     }
 
     public void openMenu(Player player, @Nullable GeneratorCategory selectedCategory) {
@@ -36,7 +39,7 @@ public class GeneratorMenu {
                 .collect(Collectors.toList());
 
         int size = 5 * 9;
-        Inventory gui = Bukkit.createInventory(null, size, "Ada Jeneratörleri§8 - " + (selectedCategory == null ? "ALL" : selectedCategory.name()));
+        Inventory gui = Bukkit.createInventory(null, size, messages.get("gui.title") + "§7 - " + (selectedCategory == null ? "ALL" : selectedCategory.name()));
 
         //  ********** Filler Items **********
         ItemStack lineFiller = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE)
@@ -60,7 +63,7 @@ public class GeneratorMenu {
         int categoryIndex = 2;
         for (GeneratorCategory category : GeneratorCategory.values()) {
             ItemStack item = new ItemBuilder(Material.valueOf(category.name()))
-                    .setDisplayName(ChatColor.YELLOW + category.name().replace("_", " ").toLowerCase())
+                    .setDisplayName(ChatColor.YELLOW + category.getDisplayName())
                     .setNBT("category", category.name())
                     .build();
             if (selectedCategory == category) {
@@ -87,7 +90,7 @@ public class GeneratorMenu {
 
         if (selectedCategory != null) {
             gui.setItem(40, new ItemBuilder(Material.RED_CANDLE)
-                    .setDisplayName("§7Jeneratörü kaldır")
+                    .setDisplayName(messages.get("gui.remove-button"))
                     .setNBT("deactivate", selectedCategory.name())
                     .build());
         }
@@ -112,10 +115,10 @@ public class GeneratorMenu {
 
             builder.addLoreLine("");
             if (isOwned) {
-                builder.addLoreLine("§7Aktifleştirmek için §etıklayın");
+                builder.addLoreLine(messages.get("gui.click-to-activate"));
                 builder.setNBT("is_owned", "true");
             } else {
-                builder.addLoreLine("§7Satın almak için §etıklayın");
+                builder.addLoreLine(messages.get("gui.click-to-buy"));
                 builder.setNBT("is_owned", "false");
             }
 

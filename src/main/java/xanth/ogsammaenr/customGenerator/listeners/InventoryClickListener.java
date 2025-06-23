@@ -2,7 +2,6 @@ package xanth.ogsammaenr.customGenerator.listeners;
 
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -17,9 +16,12 @@ import world.bentobox.bentobox.managers.IslandsManager;
 import xanth.ogsammaenr.customGenerator.CustomGenerator;
 import xanth.ogsammaenr.customGenerator.gui.GeneratorMenu;
 import xanth.ogsammaenr.customGenerator.manager.IslandGeneratorManager;
+import xanth.ogsammaenr.customGenerator.manager.MessagesManager;
 import xanth.ogsammaenr.customGenerator.model.GeneratorCategory;
 import xanth.ogsammaenr.customGenerator.model.GeneratorType;
 import xanth.ogsammaenr.customGenerator.util.IslandUtils;
+
+import java.util.Map;
 
 public class InventoryClickListener implements Listener {
     private final CustomGenerator plugin;
@@ -27,6 +29,7 @@ public class InventoryClickListener implements Listener {
     private final IslandsManager islandsManager;
     private final IslandUtils islandUtils;
     private final Economy economy;
+    private final MessagesManager messages;
 
     public InventoryClickListener(CustomGenerator plugin) {
         this.plugin = plugin;
@@ -34,13 +37,14 @@ public class InventoryClickListener implements Listener {
         this.islandsManager = BentoBox.getInstance().getIslandsManager();
         this.islandUtils = plugin.getIslandUtils();
         this.economy = plugin.getEconomyManager().getEconomy();
+        this.messages = plugin.getMessagesManager();
     }
 
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
         if (!(e.getWhoClicked() instanceof Player player)) return;
-        if (!e.getView().getTitle().startsWith("Ada Jeneratörleri")) {
+        if (!e.getView().getTitle().startsWith(messages.get("gui.title"))) {
             return;
         }
 
@@ -74,8 +78,8 @@ public class InventoryClickListener implements Listener {
                 Bukkit.getScheduler().runTaskLater(plugin, () -> {
                     new GeneratorMenu(CustomGenerator.getInstance()).openMenu(player, selectedCategory);
                 }, 3L);
-                player.sendMessage(ChatColor.GREEN + "Aktif " + ChatColor.GOLD + type.getGeneratorCategory().name() +
-                                   ChatColor.GREEN + " jeneratörü '" + type.getDisplayName() + "' olarak ayarlandı.");
+                player.sendMessage(messages.getFormatted("commands.activate.success", Map.of("category", type.getGeneratorCategory().getDisplayName(), "generator", type.getDisplayName())));
+
             } else {
                 if (manager.islandOwnsType(island.getUniqueId(), generator_id)) {
                     return;
@@ -83,14 +87,14 @@ public class InventoryClickListener implements Listener {
                 /*      Seviye Kontrolü     */
                 long level = islandUtils.getIslandLevel(player.getUniqueId(), player.getWorld().getName());
                 if (level < type.getRequiredIslandLevel()) {
-                    player.sendMessage(ChatColor.RED + "Bu jeneratörü satın almak için gereken ada seviyesi: " + type.getRequiredIslandLevel());
+                    player.sendMessage(messages.getFormatted("commands.buy.not-enough-level", Map.of("required_level", String.valueOf(type.getRequiredIslandLevel()))));
                     return;
                 }
 
                 /*      Para Kontrolü       */
                 double price = type.getPrice();
                 if (!economy.has(player, price)) {
-                    player.sendMessage(ChatColor.RED + "Bu jeneratörü satın almak için yeterli paranız yok. Gerekli: " + price);
+                    player.sendMessage(messages.getFormatted("commands.buy.not-enough-money", Map.of("price", String.valueOf(price))));
                     return;
                 }
 
@@ -101,7 +105,7 @@ public class InventoryClickListener implements Listener {
                     new GeneratorMenu(CustomGenerator.getInstance()).openMenu(player, selectedCategory);
                 }, 3L);
 
-                player.sendMessage(ChatColor.GREEN + "Başarıyla '" + type.getDisplayName() + "' jeneratörünü satın aldınız. " + ChatColor.YELLOW + type.getPrice());
+                player.sendMessage(messages.getFormatted("commands.buy.success", Map.of("generator", type.getDisplayName(), "price", String.valueOf(price))));
             }
         } else if (deactivate != null) {
             Island island = islandsManager.getOwnedIslands(player.getWorld(), player.getUniqueId()).stream().findFirst().orElse(null);
@@ -112,7 +116,7 @@ public class InventoryClickListener implements Listener {
                 new GeneratorMenu(CustomGenerator.getInstance()).openMenu(player, GeneratorCategory.valueOf(deactivate));
             }, 3L);
 
-            player.sendMessage(ChatColor.YELLOW + deactivate + ChatColor.GREEN + " Jeneratörü kaldırıldı");
+            player.sendMessage(messages.getFormatted("gui.deactivate", Map.of("category_display", GeneratorCategory.valueOf(deactivate).getDisplayName())));
 
 
         }
