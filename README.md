@@ -41,6 +41,16 @@ A fully‑featured, BentoBox‑compatible generator plugin designed to provide i
 
 ---
 
+### Commands
+
+| Command | Description |
+|---------|-------------|
+| `/generator` | Opens the main menu and displays available generators to the player. |
+| `/generator buy <generator>` | Purchases the specified generator. The player must have enough money. |
+| `/generator activate <generator>` | Activates a previously purchased generator. |
+| `/generator list` | Lists all generators defined on the server. |
+| `/generator reload` | Reloads all configuration files. Admin permission required. |
+
 ## ⚙️ Configuration Basics
 
 ### Defining Generator Types
