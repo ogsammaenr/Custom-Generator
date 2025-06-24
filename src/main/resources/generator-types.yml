@@ -14,7 +14,7 @@ generator-types:
   coal:
     display-name: "&7Coal Generator"                # Display name shown in the GUI
     material: COAL_ORE                              # Icon material for the GUI (Bukkit Material)
-    lore: # Description shown in the GUI (optional)
+    lore: # Description shown in the GUI
       - "&8A simple generator type."
       - "&7Produces 60% stone and 40% coal."
     generator-type: COBBLESTONE                     # Generator category (see category list below)
@@ -50,6 +50,60 @@ generator-types:
       STONE: 0.7
       DIAMOND_ORE: 0.3
 
+  stones:
+    display-name: "&7Stones"
+    material: ANDESITE
+    lore:
+      - "&b7Stones and stone types"
+      - "&7Produces :"
+      - " - Stone: %40"
+      - " - Andesite: %20"
+      - " - Granite: %20"
+      - " - Diorite: %20"
+    generator-type: STONE
+    price: 1000
+    required-island-level: 30
+    blocks:
+      STONE: 0.4
+      ANDESITE: 0.2
+      GRANITE: 0.2
+      DIORITE: 0.2
+
+  nether:
+    display-name: "&cNether Generator"
+    material: NETHERRACK
+    lore:
+      - "&b7Nether material"
+      - "&7Produces :"
+      - " - Basalt: %40"
+      - " - Netherrack: %20"
+      - " - Blackstone: %20"
+      - " - Nether gold ore: %20"
+    generator-type: BASALT
+    price: 2000
+    required-island-level: 30
+    blocks:
+      NETHERRACK: 0.2
+      BLACKSTONE: 0.2
+      BASALT: 0.4
+      NETHER_GOLD_ORE: 0.2
+
+  deepslate:
+    display-name: "&7Deepslate Generator"
+    material: DEEPSLATE
+    lore:
+      - "&b7Deepslate and Deepslate types"
+      - "&7Produces :"
+      - " - Deepslate: %40"
+      - " - Tuff: %30"
+      - " - Calcıte: %30"
+    generator-type: DEEPSLATE
+    price: 3000
+    required-island-level: 1000
+    blocks:
+      DEEPSLATE: 40
+      TUFF: 30
+      CALCITE: 30
 
 # ===========================================================
 # 📘 EXPLANATIONS

@@ -35,8 +35,6 @@ public final class CustomGenerator extends JavaPlugin {
 
         this.islandUtils = new IslandUtils();
 
-        saveDefaultConfig();
-
         this.databaseConnector = new SQLiteConnector(this);
         this.islandGeneratorDAO = new IslandGeneratorDAO(this, databaseConnector);
 

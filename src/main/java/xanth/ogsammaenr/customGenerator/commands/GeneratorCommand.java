@@ -53,7 +53,7 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatColor.RED + "Bu komutu sadece oyuncular kullanabilir.");
+            sender.sendMessage(ChatColor.RED + "This command can only be executed by a player!");
             return true;
         }
 
@@ -68,7 +68,7 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
             case "reload" -> handleReloadCommand(player, args);
             case "list" -> handleListCommand(player, args);
             case "help" -> handleHelpCommand(player, args);
-            default -> player.sendMessage(ChatColor.RED + "Bilinmeyen komut: " + sub);
+            default -> player.sendMessage(messages.get("commands.general.unknown-command"));
         }
 
         return true;
@@ -176,7 +176,6 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        plugin.reloadConfig();
         plugin.getTypeLoader().loadGeneratorTypes();
         messages.reload();
 

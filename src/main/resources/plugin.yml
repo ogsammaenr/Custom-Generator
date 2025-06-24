@@ -1,5 +1,5 @@
 name: CustomGenerator
-version: '1.0-SNAPSHOT'
+version: '1.0.0'
 main: xanth.ogsammaenr.customGenerator.CustomGenerator
 api-version: '1.21'
 authors: [ ogsammaenr ]

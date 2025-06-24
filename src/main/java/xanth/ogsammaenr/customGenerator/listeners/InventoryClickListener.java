@@ -116,7 +116,7 @@ public class InventoryClickListener implements Listener {
                 new GeneratorMenu(CustomGenerator.getInstance()).openMenu(player, GeneratorCategory.valueOf(deactivate));
             }, 3L);
 
-            player.sendMessage(messages.getFormatted("gui.deactivate", Map.of("category_display", GeneratorCategory.valueOf(deactivate).getDisplayName())));
+            player.sendMessage(messages.getFormatted("gui.deactivate", Map.of("category", GeneratorCategory.valueOf(deactivate).getDisplayName())));
 
 
         }
