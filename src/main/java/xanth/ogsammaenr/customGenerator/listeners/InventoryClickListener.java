@@ -79,11 +79,7 @@ public class InventoryClickListener implements Listener {
             }
             Island island = optionalIsland.get();
             if (is_owned.equals("true")) {
-
-
                 manager.setGeneratorType(island.getUniqueId(), generator_id);
-
-                plugin.getLogger().info("Yeni bir jeneratör aktifleştirildi : " + island.getUniqueId() + "    " + generator_id);
 
                 Bukkit.getScheduler().runTaskLater(plugin, () -> {
                     new GeneratorMenu(CustomGenerator.getInstance()).openMenu(player, selectedCategory);

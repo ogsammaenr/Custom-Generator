@@ -31,47 +31,31 @@ public class GeneratorListener implements Listener {
     @EventHandler
     public void onBlockForm(BlockFormEvent event) {
         Material type = event.getNewState().getType();
-        plugin.getLogger().info("Event tetiklendi");
 
         if (!(type == Material.COBBLESTONE || type == Material.STONE || type == Material.BASALT)) {
-            plugin.getLogger().info("Material " + type + " not supported");
-            return; // İlgili değilse işlem yapma
+            return;
         }
 
         Block block = event.getBlock();
         Location loc = block.getLocation();
         World world = block.getWorld();
 
-        plugin.getLogger().info("Material :  " + type.name());
-        plugin.getLogger().info("Block : " + block.getType() + " " + block.getX() + " " + block.getY() + " " + block.getZ());
-        plugin.getLogger().info("world : " + world.getName());
 
         Island island = BentoBox.getInstance().getIslandsManager().getIslandAt(loc).get();
         if (island == null) {
-            plugin.getLogger().info("island is null");
             return;
         }
-        plugin.getLogger().info("");
-        plugin.getLogger().info("island :");
-        plugin.getLogger().info(island.getUniqueId());
-        plugin.getLogger().info("");
-        plugin.getLogger().info(island.getName());
-        plugin.getLogger().info("");
-        plugin.getLogger().info(Bukkit.getOfflinePlayer(island.getOwner()).getName());
-        plugin.getLogger().info("");
 
-        GeneratorType generatorType = islandGeneratorManager.getGeneratorType(island.getUniqueId(), GeneratorCategory.valueOf(type.name()));
-        if (generatorType == null) {
-            plugin.getLogger().info("Adanın Aktif Jeneratör Tipi Boş");
-            return;
-        }
-        plugin.getLogger().info("Adanın Jeneratör Tipi : " + generatorType.getId());
-
-
+        GeneratorType generatorType = null;
         if (type == Material.STONE
             && loc.getBlockY() < 0
             && islandGeneratorManager.getGeneratorType(island.getUniqueId(), GeneratorCategory.DEEPSLATE) != null) {
             generatorType = islandGeneratorManager.getGeneratorType(island.getUniqueId(), GeneratorCategory.DEEPSLATE);
+        }
+
+        generatorType = generatorType == null ? islandGeneratorManager.getGeneratorType(island.getUniqueId(), GeneratorCategory.valueOf(type.name())) : generatorType;
+        if (generatorType == null) {
+            return;
         }
 
         event.setCancelled(true);
