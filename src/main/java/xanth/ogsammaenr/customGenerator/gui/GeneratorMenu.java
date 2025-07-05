@@ -18,7 +18,9 @@ import xanth.ogsammaenr.customGenerator.model.GeneratorCategory;
 import xanth.ogsammaenr.customGenerator.model.GeneratorType;
 import xanth.ogsammaenr.customGenerator.util.ItemBuilder;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,6 +38,7 @@ public class GeneratorMenu {
     public void openMenu(Player player, @Nullable GeneratorCategory selectedCategory) {
         List<GeneratorType> types = manager.getAllRegisteredTypes().values().stream()
                 .filter(type -> selectedCategory == null || type.getGeneratorCategory() == selectedCategory)
+                .sorted(Comparator.comparingInt(GeneratorType::getPriority))
                 .collect(Collectors.toList());
 
         int size = 5 * 9;
@@ -98,11 +101,12 @@ public class GeneratorMenu {
         //  **********  Generator Type Items **********
 
         int typeIndex = 9;
-        Island island = BentoBox.getInstance().getIslandsManager()
-                .getOwnedIslands(player.getWorld(), player.getUniqueId())
-                .stream()
-                .findFirst()
-                .orElse(null);
+        Optional<Island> optionalIsland = BentoBox.getInstance().getIslandsManager().getIslandAt(player.getLocation());
+        if (optionalIsland.isEmpty()) {
+            player.sendMessage(messages.get("commands.general.no-island"));
+            return;
+        }
+        Island island = optionalIsland.get();
 
         String islandId = island.getUniqueId();
         Set<String> ownedTypes = manager.getOwnedTypes(islandId);
