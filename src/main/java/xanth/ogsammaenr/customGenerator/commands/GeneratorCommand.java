@@ -219,6 +219,7 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
         String worldName = world.getName();
         if (!worldName.equals("bskyblock_world") && !worldName.equals("bskyblock_world_nether") && !worldName.equals("bskyblock_world_the_end")) {
             player.sendMessage(messages.get("commands.general.not-in-island-world"));
+            return;
         }
 
         /*      Ada Kontrolü        */
