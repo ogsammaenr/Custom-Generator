@@ -3,6 +3,7 @@ commands:
     unknown-command: "&cUnknown Command"
     not-in-island-world: "&eYou are not in the island world."
     no-island: "&cYou do not own an island."
+    not-owner: "&cYou are not the owner this island"
     unknown-type: "&cUnknown generator type: %generator%"
     no-permission: "&cYou do not have permission to use this command."
 

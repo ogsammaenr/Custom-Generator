@@ -22,6 +22,7 @@ import xanth.ogsammaenr.customGenerator.model.GeneratorType;
 import xanth.ogsammaenr.customGenerator.util.IslandUtils;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class InventoryClickListener implements Listener {
     private final CustomGenerator plugin;
@@ -70,10 +71,19 @@ public class InventoryClickListener implements Listener {
             new GeneratorMenu(CustomGenerator.getInstance()).openMenu(player, GeneratorCategory.valueOf(categoryId));
         } else if (generator_id != null) {
             GeneratorType type = manager.getRegisteredType(generator_id);
-            Island island = islandsManager.getOwnedIslands(player.getWorld(), player.getUniqueId()).stream().findFirst().orElse(null);
 
+            Optional<Island> optionalIsland = BentoBox.getInstance().getIslandsManager().getIslandAt(player.getLocation());
+            if (optionalIsland.isEmpty()) {
+                player.sendMessage(messages.get("commands.general.no-island"));
+                return;
+            }
+            Island island = optionalIsland.get();
             if (is_owned.equals("true")) {
+
+
                 manager.setGeneratorType(island.getUniqueId(), generator_id);
+
+                plugin.getLogger().info("Yeni bir jeneratör aktifleştirildi : " + island.getUniqueId() + "    " + generator_id);
 
                 Bukkit.getScheduler().runTaskLater(plugin, () -> {
                     new GeneratorMenu(CustomGenerator.getInstance()).openMenu(player, selectedCategory);

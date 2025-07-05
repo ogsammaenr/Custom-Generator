@@ -3,6 +3,7 @@ package xanth.ogsammaenr.customGenerator.commands;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -211,17 +212,26 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
     }
 
     private void handleGeneratorCommand(Player player) {
+        Location loc = player.getLocation();
+
         /*      Dünya Kontrolü      */
         World world = player.getWorld();
         String worldName = world.getName();
         if (!worldName.equals("bskyblock_world") && !worldName.equals("bskyblock_world_nether") && !worldName.equals("bskyblock_world_the_end")) {
-            player.sendMessage(messages.get("commands.general.no-island"));
+            player.sendMessage(messages.get("commands.general.not-in-island-world"));
         }
 
         /*      Ada Kontrolü        */
-        Island island = islandsManager.getOwnedIslands(world, player.getUniqueId()).stream().findFirst().orElse(null);
-        if (island == null) {
+        Optional<Island> optionalIsland = BentoBox.getInstance().getIslandsManager().getIslandAt(loc);
+        if (optionalIsland.isEmpty()) {
             player.sendMessage(messages.get("commands.general.no-island"));
+            return;
+        }
+
+        /*      Sahiplik Kontrolü      */
+        Island island = optionalIsland.get();
+        if (!island.getOwner().equals(player.getUniqueId())) {
+            player.sendMessage(messages.get("commands.general.not-owner"));
             return;
         }
 

@@ -54,7 +54,7 @@ generator-types:
     display-name: "&7Stones"
     material: ANDESITE
     lore:
-      - "&b7Stones and stone types"
+      - "&7Stones and stone types"
       - "&7Produces :"
       - " - Stone: %40"
       - " - Andesite: %20"
@@ -62,7 +62,7 @@ generator-types:
       - " - Diorite: %20"
     generator-type: STONE
     price: 1000
-    required-island-level: 30
+    required-island-level: 50
     blocks:
       STONE: 0.4
       ANDESITE: 0.2
@@ -81,7 +81,7 @@ generator-types:
       - " - Nether gold ore: %20"
     generator-type: BASALT
     price: 2000
-    required-island-level: 30
+    required-island-level: 300
     blocks:
       NETHERRACK: 0.2
       BLACKSTONE: 0.2
