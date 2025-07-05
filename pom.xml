@@ -6,7 +6,7 @@
 
     <groupId>xanth.ogsammaenr</groupId>
     <artifactId>customgenerator</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <name>customgenerator</name>

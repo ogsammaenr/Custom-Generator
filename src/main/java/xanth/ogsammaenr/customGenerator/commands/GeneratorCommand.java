@@ -69,6 +69,7 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
             case "reload" -> handleReloadCommand(player, args);
             case "list" -> handleListCommand(player, args);
             case "help" -> handleHelpCommand(player, args);
+            case "version" -> handleVersionCommand(player, args);
             default -> player.sendMessage(messages.get("commands.general.unknown-command"));
         }
 
@@ -172,7 +173,7 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
     }
 
     private void handleReloadCommand(Player player, String[] args) {
-        if (!player.hasPermission("customgenerator.reload")) {
+        if (!player.hasPermission("customgenerator.admin")) {
             player.sendMessage(messages.get("commands.general.no-permission"));
             return;
         }
@@ -189,6 +190,20 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
             GeneratorType type = entry.getValue();
             player.sendMessage(messages.getFormatted("commands.list.entry", Map.of("generator", type.getDisplayName(), "category", type.getGeneratorCategory().getDisplayName())));
         }
+    }
+
+    private void handleVersionCommand(Player player, String[] args) {
+        if (player.hasPermission("customgenerator.admin")) {
+            player.sendMessage(messages.get("commands.general.no-permission"));
+            return;
+        }
+
+        player.sendMessage(ChatColor.GRAY + "==========[ " + ChatColor.GOLD + plugin.getName() + ChatColor.GRAY + " ]==========");
+        player.sendMessage(ChatColor.YELLOW + "Plugin Version: " + ChatColor.GREEN + plugin.getDescription().getVersion());
+        player.sendMessage(ChatColor.YELLOW + "Sunucu Version: " + ChatColor.GREEN + Bukkit.getVersion());
+        player.sendMessage(ChatColor.YELLOW + "API Version: " + ChatColor.GREEN + Bukkit.getBukkitVersion());
+        player.sendMessage(ChatColor.GRAY + "====================================");
+
     }
 
     /**
