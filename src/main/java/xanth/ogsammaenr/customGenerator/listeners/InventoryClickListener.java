@@ -72,7 +72,7 @@ public class InventoryClickListener implements Listener {
         } else if (generator_id != null) {
             GeneratorType type = manager.getRegisteredType(generator_id);
 
-            Optional<Island> optionalIsland = BentoBox.getInstance().getIslandsManager().getIslandAt(player.getLocation());
+            Optional<Island> optionalIsland = islandsManager.getIslandAt(player.getLocation());
             if (optionalIsland.isEmpty()) {
                 player.sendMessage(messages.get("commands.general.no-island"));
                 return;
@@ -114,7 +114,7 @@ public class InventoryClickListener implements Listener {
                 player.sendMessage(messages.getFormatted("commands.buy.success", Map.of("generator", type.getDisplayName(), "price", String.valueOf(price))));
             }
         } else if (deactivate != null) {
-            Optional<Island> optionalIsland = BentoBox.getInstance().getIslandsManager().getIslandAt(player.getLocation());
+            Optional<Island> optionalIsland = islandsManager.getIslandAt(player.getLocation());
             if (optionalIsland.isEmpty()) {
                 player.sendMessage(messages.get("commands.general.no-island"));
                 return;

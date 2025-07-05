@@ -3,10 +3,12 @@ package xanth.ogsammaenr.customGenerator.listeners;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockFormEvent;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.database.objects.Island;
+import world.bentobox.bentobox.managers.IslandsManager;
 import xanth.ogsammaenr.customGenerator.CustomGenerator;
 import xanth.ogsammaenr.customGenerator.manager.IslandGeneratorManager;
 import xanth.ogsammaenr.customGenerator.model.GeneratorCategory;
@@ -19,16 +21,18 @@ public class GeneratorListener implements Listener {
 
     private CustomGenerator plugin;
     private IslandGeneratorManager islandGeneratorManager;
+    private IslandsManager islandsManager;
 
     private Random rand = new Random();
 
     public GeneratorListener() {
         this.plugin = CustomGenerator.getInstance();
         this.islandGeneratorManager = plugin.getIslandGeneratorManager();
+        islandsManager = BentoBox.getInstance().getIslandsManager();
     }
 
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onBlockForm(BlockFormEvent event) {
         Material type = event.getNewState().getType();
 
@@ -41,7 +45,7 @@ public class GeneratorListener implements Listener {
         World world = block.getWorld();
 
 
-        Island island = BentoBox.getInstance().getIslandsManager().getIslandAt(loc).get();
+        Island island = islandsManager.getIslandAt(loc).get();
         if (island == null) {
             return;
         }
