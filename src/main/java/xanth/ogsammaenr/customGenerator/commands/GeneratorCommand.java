@@ -193,7 +193,7 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
     }
 
     private void handleVersionCommand(Player player, String[] args) {
-        if (player.hasPermission("customgenerator.admin")) {
+        if (!player.hasPermission("customgenerator.admin")) {
             player.sendMessage(messages.get("commands.general.no-permission"));
             return;
         }
