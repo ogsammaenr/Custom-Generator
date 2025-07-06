@@ -32,7 +32,8 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
     private final IslandUtils islandUtils;
     private final MessagesManager messages;
 
-    private static final List<String> SUB_COMMANDS = List.of("reload", "list", "info", "buy", "activate");
+    private static final List<String> SUB_COMMANDS = List.of("help", "buy", "activate");
+    private static final List<String> ADMIN_COMMANDS = List.of("version", "reload", "list");
 
 
     public GeneratorCommand(CustomGenerator plugin) {
@@ -185,6 +186,11 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
     }
 
     private void handleListCommand(Player player, String[] args) {
+        if (!player.hasPermission("customgenerator.admin")) {
+            player.sendMessage(messages.get("commands.general.no-permission"));
+            return;
+        }
+
         player.sendMessage(messages.get("commands.list.header"));
         for (Map.Entry<String, GeneratorType> entry : generatorManager.getAllRegisteredTypes().entrySet()) {
             GeneratorType type = entry.getValue();
@@ -200,30 +206,26 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
 
         player.sendMessage(ChatColor.GRAY + "==========[ " + ChatColor.GOLD + plugin.getName() + ChatColor.GRAY + " ]==========");
         player.sendMessage(ChatColor.YELLOW + "Plugin Version: " + ChatColor.GREEN + plugin.getDescription().getVersion());
-        player.sendMessage(ChatColor.YELLOW + "Sunucu Version: " + ChatColor.GREEN + Bukkit.getVersion());
+        player.sendMessage(ChatColor.YELLOW + "Server Version: " + ChatColor.GREEN + Bukkit.getVersion());
         player.sendMessage(ChatColor.YELLOW + "API Version: " + ChatColor.GREEN + Bukkit.getBukkitVersion());
         player.sendMessage(ChatColor.GRAY + "====================================");
 
     }
 
-    /**
-     * @param player Command Sender
-     * @param args   Command
-     */
     private void handleHelpCommand(Player player, String[] args) {
-        player.sendMessage(messages.get("help.header-top"));
-        player.sendMessage(messages.get("help.header-title"));
+        player.sendMessage(messages.get("commands.help.header-top"));
+        player.sendMessage(messages.get("commands.help.header-title"));
 
-        List<String> entries = plugin.getMessagesManager().getConfig().getStringList("help.entries");
+        List<String> entries = plugin.getMessagesManager().getConfig().getStringList("commands.help.entries");
 
         for (String line : entries) {
-            if (line.contains("reload") && !player.hasPermission("customgenerator.admin")) {
+            if ((line.contains("reload") || line.contains("list")) && !player.hasPermission("customgenerator.admin")) {
                 continue;
             }
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', line));
         }
 
-        player.sendMessage(messages.get("help.footer-bottom"));
+        player.sendMessage(messages.get("commands.help.footer-bottom"));
     }
 
     private void handleGeneratorCommand(Player player) {
@@ -269,7 +271,12 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 1) {
-            return StringUtil.copyPartialMatches(args[0], SUB_COMMANDS, new ArrayList<>());
+            List<String> commands = new ArrayList<>();
+            commands.addAll(SUB_COMMANDS);
+            if (sender.hasPermission("customgenerator.admin")) {
+                commands.addAll(ADMIN_COMMANDS);
+            }
+            return StringUtil.copyPartialMatches(args[0], commands, new ArrayList<>());
         }
 
         if (args.length == 2) {
