@@ -32,7 +32,7 @@ public class GeneratorListener implements Listener {
     }
 
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onBlockForm(BlockFormEvent event) {
         Material type = event.getNewState().getType();
 

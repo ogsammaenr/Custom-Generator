@@ -1,7 +1,10 @@
 package xanth.ogsammaenr.customGenerator;
 
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import xanth.ogsammaenr.customGenerator.commands.GeneratorCommand;
+import xanth.ogsammaenr.customGenerator.listeners.FertilizeListener;
+import xanth.ogsammaenr.customGenerator.listeners.GeneratorFlowListener;
 import xanth.ogsammaenr.customGenerator.listeners.GeneratorListener;
 import xanth.ogsammaenr.customGenerator.listeners.InventoryClickListener;
 import xanth.ogsammaenr.customGenerator.manager.EconomyManager;
@@ -27,7 +30,10 @@ public final class CustomGenerator extends JavaPlugin {
     private IslandUtils islandUtils;
 
     private GeneratorListener generatorListener;
+    private GeneratorFlowListener generatorFlowListener;
     private InventoryClickListener inventoryClickListener;
+    private FertilizeListener fertilizeListener;
+    private PluginManager pm;
 
     @Override
     public void onEnable() {
@@ -37,6 +43,8 @@ public final class CustomGenerator extends JavaPlugin {
 
         this.databaseConnector = new SQLiteConnector(this);
         this.islandGeneratorDAO = new IslandGeneratorDAO(this, databaseConnector);
+
+        this.pm = getServer().getPluginManager();
 
         ///========== Manager sınıfları ==========
         economyManager = new EconomyManager(this);
@@ -59,11 +67,13 @@ public final class CustomGenerator extends JavaPlugin {
         getCommand("generator").setExecutor(new GeneratorCommand(this));
 
         ///========== listener Kayıtları =========
-        generatorListener = new GeneratorListener();
+        generatorFlowListener = new GeneratorFlowListener();
+        fertilizeListener = new FertilizeListener();
         inventoryClickListener = new InventoryClickListener(this);
 
-        getServer().getPluginManager().registerEvents(generatorListener, this);
-        getServer().getPluginManager().registerEvents(inventoryClickListener, this);
+        pm.registerEvents(generatorFlowListener, this);
+        pm.registerEvents(inventoryClickListener, this);
+        pm.registerEvents(fertilizeListener, this);
 
         getLogger().info("***** CustomGenerator is enabled *****");
     }

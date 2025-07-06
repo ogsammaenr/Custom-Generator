@@ -86,7 +86,7 @@ public class InventoryClickListener implements Listener {
                 }, 3L);
                 player.sendMessage(messages.getFormatted("commands.activate.success", Map.of("category", type.getGeneratorCategory().getDisplayName(), "generator", type.getDisplayName())));
 
-            } else {
+            } else if (is_owned.equals("false")) {
                 if (manager.islandOwnsType(island.getUniqueId(), generator_id)) {
                     return;
                 }
