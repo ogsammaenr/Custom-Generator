@@ -130,18 +130,6 @@ public class IslandGeneratorManager {
         return registeredTypes;
     }
 
-    // ==========================
-    // = Veri yükleme / kaydetme =
-    // ==========================
-
-    public void loadIslandData() {
-        // TODO: Ada jeneratör verilerini diskten yükle
-    }
-
-    public void saveIslandData() {
-        // TODO: Ada jeneratör verilerini diske kaydet
-    }
-
     public String getRegisteredTypeString() {
         String typeId = "";
         for (GeneratorType type : registeredTypes.values()) {

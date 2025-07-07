@@ -118,11 +118,12 @@ public class GeneratorMenu {
             boolean isActive = manager.isGeneratorTypeActive(islandId, type.getId());
 
             builder.addLoreLine("");
-            if (isOwned) {
+
+            if (isActive) {
+                builder.setNBT("is_owned", "active");
+            } else if (isOwned) {
                 builder.addLoreLine(messages.get("gui.click-to-activate"));
                 builder.setNBT("is_owned", "true");
-            } else if (isActive) {
-                builder.setNBT("is_owned", "active");
             } else {
                 builder.addLoreLine(messages.get("gui.click-to-buy"));
                 builder.setNBT("is_owned", "false");

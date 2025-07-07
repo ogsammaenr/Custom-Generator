@@ -1,6 +1,6 @@
 package xanth.ogsammaenr.customGenerator.model;
 
-public enum GeneratorCategory {
+public enum GeneratorCategory implements IGeneratorCategory {
     COBBLESTONE(""),
     STONE(""),
     BASALT(""),
@@ -13,6 +13,12 @@ public enum GeneratorCategory {
         this.displayName = displayName;
     }
 
+    @Override
+    public String getId() {
+        return this.name();
+    }
+
+    @Override
     public String getDisplayName() {
         return displayName;
     }

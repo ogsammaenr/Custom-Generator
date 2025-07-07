@@ -1,0 +1,15 @@
+custom-categories:
+  dirt_generator:
+    category: DIRTGEN
+    fluid: LAVA
+    to: WATER
+    conditions:
+      sides: [ DIRT ]
+      up: [ STONE ]
+      down: [ AIR ]
+    y-level:
+      min: 10
+      max: 64
+    biomes:
+      - minecraft:plains
+      - minecraft:the_void

@@ -8,6 +8,7 @@ import xanth.ogsammaenr.customGenerator.CustomGenerator;
 import xanth.ogsammaenr.customGenerator.manager.IslandGeneratorManager;
 import xanth.ogsammaenr.customGenerator.model.GeneratorCategory;
 import xanth.ogsammaenr.customGenerator.model.GeneratorType;
+import xanth.ogsammaenr.customGenerator.model.IGeneratorCategory;
 
 import java.io.File;
 import java.util.LinkedHashMap;
@@ -34,7 +35,7 @@ public class GeneratorTypeLoader {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
         ConfigurationSection section = config.getConfigurationSection("generator-types");
         if (section == null) {
-            plugin.getLogger().warning("generator-types.yml içinde 'generator-types' bölümü bulunamadı.");
+            plugin.getLogger().warning("generator-types.yml not found");
             return;
         }
 
@@ -59,12 +60,15 @@ public class GeneratorTypeLoader {
                     .map(line -> ChatColor.translateAlternateColorCodes('&', line))
                     .collect(Collectors.toList());
             String categoryName = genSec.getString("generator-type", "COBBLESTONE").toUpperCase();
-            GeneratorCategory category;
-            try {
-                category = GeneratorCategory.valueOf(categoryName);
-            } catch (IllegalArgumentException e) {
-                plugin.getLogger().warning("Geçersiz generator-type: " + categoryName + " (ID: " + id + ")");
-                continue;
+
+            IGeneratorCategory category = plugin.getCustomCategoryManager().getCategoryById(categoryName);
+            if (category == null) {
+                try {
+                    category = GeneratorCategory.valueOf(categoryName);
+                } catch (IllegalArgumentException e) {
+                    plugin.getLogger().warning("Geçersiz generator-type: " + categoryName + " (ID: " + id + ")");
+                    continue;
+                }
             }
 
             double price = genSec.getDouble("price", 0.0);

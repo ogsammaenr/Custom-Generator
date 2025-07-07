@@ -24,7 +24,8 @@ public class FertilizeListener implements Listener {
             Material.DIRT,
             Material.GRASS_BLOCK,
             Material.ROOTED_DIRT,
-            Material.MUD
+            Material.MUD,
+            Material.AIR
     );
 
 
@@ -68,7 +69,7 @@ public class FertilizeListener implements Listener {
             BlockState state = iterator.next();
             Block target = state.getBlock();
 
-            if (target.getLocation().distanceSquared(loc) > 4 || !allowed.contains(target.getType())) {
+            if (target.getLocation().distanceSquared(loc) > 4 || !allowed.contains(target.getType()) || random.nextDouble(1) < 0.5) {
                 iterator.remove();
             }
         }

@@ -13,7 +13,7 @@ public class GeneratorType {
     private final String displayName;
     private final Material icon;
     private final List<String> lore;
-    private final GeneratorCategory generatorCategory;
+    private final IGeneratorCategory generatorCategory;
     private final double price;
     private final int requiredIslandLevel;
     private final Map<Material, Double> blockChances;
@@ -24,7 +24,7 @@ public class GeneratorType {
             String displayName,
             Material icon,
             List<String> lore,
-            GeneratorCategory generatorCategory,
+            IGeneratorCategory generatorCategory,
             double price,
             int requiredIslandLevel,
             Map<Material, Double> blockChances
@@ -73,7 +73,7 @@ public class GeneratorType {
     /**
      * @return Generator Category (Enum)
      */
-    public GeneratorCategory getGeneratorCategory() {
+    public IGeneratorCategory getGeneratorCategory() {
         return generatorCategory;
     }
 
