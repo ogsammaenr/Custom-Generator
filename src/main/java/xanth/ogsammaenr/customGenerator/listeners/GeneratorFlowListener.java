@@ -15,13 +15,11 @@ import world.bentobox.bentobox.database.objects.Island;
 import world.bentobox.bentobox.managers.IslandsManager;
 import xanth.ogsammaenr.customGenerator.CustomGenerator;
 import xanth.ogsammaenr.customGenerator.manager.IslandGeneratorManager;
-import xanth.ogsammaenr.customGenerator.model.GeneratorCategory;
 import xanth.ogsammaenr.customGenerator.model.GeneratorType;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Set;
 
 public class GeneratorFlowListener implements Listener {
     private final CustomGenerator plugin;
@@ -29,13 +27,6 @@ public class GeneratorFlowListener implements Listener {
     private final IslandsManager islandsManager;
 
     private Random rand = new Random();
-
-    private static final Set<Material> VALID_TARGET_BLOCKS = Set.of(
-            Material.AIR,
-            Material.CAVE_AIR,
-            Material.VOID_AIR,
-            Material.WATER
-    );
 
     public GeneratorFlowListener() {
         plugin = CustomGenerator.getInstance();
@@ -57,11 +48,6 @@ public class GeneratorFlowListener implements Listener {
 
         //  sadece farklı bir türe akmayı dinle
         if (target.getType().equals(liquid)) return;
-
-        //  sadece belirli bloklara akma olayını dinle
-        if (!VALID_TARGET_BLOCKS.contains(target.getType())) {
-            return;
-        }
 
         Material type = null;
         Block blockToChange = target;
@@ -103,11 +89,11 @@ public class GeneratorFlowListener implements Listener {
         GeneratorType generatorType = null;
         if (type == Material.STONE
             && blockToChange.getLocation().getBlockY() < 0
-            && islandGeneratorManager.getGeneratorType(island.getUniqueId(), GeneratorCategory.DEEPSLATE) != null) {
-            generatorType = islandGeneratorManager.getGeneratorType(island.getUniqueId(), GeneratorCategory.DEEPSLATE);
+            && islandGeneratorManager.getGeneratorType(island.getUniqueId(), "DEEPSLATE") != null) {
+            generatorType = islandGeneratorManager.getGeneratorType(island.getUniqueId(), "DEEPSLATE");
         }
         generatorType = generatorType == null
-                ? islandGeneratorManager.getGeneratorType(island.getUniqueId(), GeneratorCategory.valueOf(type.name()))
+                ? islandGeneratorManager.getGeneratorType(island.getUniqueId(), type.name())
                 : generatorType;
 
         //  Jeneratör Tipi Boş ise işlem yapma

@@ -3,18 +3,12 @@ package xanth.ogsammaenr.customGenerator;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import xanth.ogsammaenr.customGenerator.commands.GeneratorCommand;
-import xanth.ogsammaenr.customGenerator.listeners.FertilizeListener;
-import xanth.ogsammaenr.customGenerator.listeners.GeneratorFlowListener;
-import xanth.ogsammaenr.customGenerator.listeners.GeneratorListener;
-import xanth.ogsammaenr.customGenerator.listeners.InventoryClickListener;
+import xanth.ogsammaenr.customGenerator.listeners.*;
 import xanth.ogsammaenr.customGenerator.manager.CustomCategoryManager;
 import xanth.ogsammaenr.customGenerator.manager.EconomyManager;
 import xanth.ogsammaenr.customGenerator.manager.IslandGeneratorManager;
 import xanth.ogsammaenr.customGenerator.manager.MessagesManager;
-import xanth.ogsammaenr.customGenerator.storage.DatabaseConnector;
-import xanth.ogsammaenr.customGenerator.storage.GeneratorTypeLoader;
-import xanth.ogsammaenr.customGenerator.storage.IslandGeneratorDAO;
-import xanth.ogsammaenr.customGenerator.storage.SQLiteConnector;
+import xanth.ogsammaenr.customGenerator.storage.*;
 import xanth.ogsammaenr.customGenerator.util.IslandUtils;
 
 public final class CustomGenerator extends JavaPlugin {
@@ -26,13 +20,15 @@ public final class CustomGenerator extends JavaPlugin {
     private CustomCategoryManager customCategoryManager;
 
     private GeneratorTypeLoader typeLoader;
+    private CustomCategoryLoader customCategoryLoader;
     private DatabaseConnector databaseConnector;
     private IslandGeneratorDAO islandGeneratorDAO;
 
     private IslandUtils islandUtils;
 
-    private GeneratorListener generatorListener;
+    private CustomGeneratorListener customGeneratorListener;
     private GeneratorFlowListener generatorFlowListener;
+    private GeneratorListener generatorListener;
     private InventoryClickListener inventoryClickListener;
     private FertilizeListener fertilizeListener;
     private PluginManager pm;
@@ -50,9 +46,9 @@ public final class CustomGenerator extends JavaPlugin {
 
         ///========== Manager sınıfları ==========
         economyManager = new EconomyManager(this);
+        customCategoryManager = new CustomCategoryManager();
         islandGeneratorManager = new IslandGeneratorManager(this, islandGeneratorDAO);
         messagesManager = new MessagesManager(this);
-        customCategoryManager = new CustomCategoryManager();
 
         if (!economyManager.setupEconomy()) {
             getLogger().severe("Vault ekonomisi bulunamadı! Plugin kapatılıyor.");
@@ -62,21 +58,27 @@ public final class CustomGenerator extends JavaPlugin {
 
         ///========== Veri Yükleme ==========
         this.typeLoader = new GeneratorTypeLoader(this);
+        this.customCategoryLoader = new CustomCategoryLoader(this);
 
+        customCategoryLoader.loadCustomCategories();
         typeLoader.loadGeneratorTypes();
-        islandGeneratorDAO.loadAll(islandGeneratorManager);
+        islandGeneratorDAO.loadAll(islandGeneratorManager, customCategoryManager);
 
         ///========== Komut kayıtları ==========
         getCommand("generator").setExecutor(new GeneratorCommand(this));
 
         ///========== listener Kayıtları =========
-        generatorFlowListener = new GeneratorFlowListener();
+        //generatorFlowListener = new GeneratorFlowListener();
         fertilizeListener = new FertilizeListener();
+        //customGeneratorListener = new CustomGeneratorListener(this);
         inventoryClickListener = new InventoryClickListener(this);
+        generatorListener = new GeneratorListener(this);
 
-        pm.registerEvents(generatorFlowListener, this);
+//        pm.registerEvents(generatorFlowListener, this);
         pm.registerEvents(inventoryClickListener, this);
         pm.registerEvents(fertilizeListener, this);
+//        pm.registerEvents(customGeneratorListener, this);
+        pm.registerEvents(generatorListener, this);
 
         getLogger().info("***** CustomGenerator is enabled *****");
     }
@@ -120,5 +122,9 @@ public final class CustomGenerator extends JavaPlugin {
 
     public CustomCategoryManager getCustomCategoryManager() {
         return customCategoryManager;
+    }
+
+    public CustomCategoryLoader getCustomCategoryLoader() {
+        return customCategoryLoader;
     }
 }

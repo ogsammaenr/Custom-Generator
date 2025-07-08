@@ -37,7 +37,7 @@ public class CustomCategoryLoader {
      * and registers them to the {@link CustomCategoryManager}.
      * If any section is invalid or missing required fields, it will be skipped with a warning.
      */
-    public void loadCustomCategory() {
+    public void loadCustomCategories() {
         File file = new File(plugin.getDataFolder(), "custom-generator-categories.yml");
         if (!file.exists()) {
             plugin.saveResource("custom-generator-categories.yml", false);
@@ -58,6 +58,7 @@ public class CustomCategoryLoader {
             try {
                 CustomGeneratorCategory category = parseCategory(key, catsec);
                 manager.addCategory(category);
+                plugin.getLogger().info(category.getId() + " : " + category.toString());
             } catch (Exception e) {
                 plugin.getLogger().warning("Failed to load custom category '" + key + "': " + e.getMessage());
             }
@@ -88,7 +89,7 @@ public class CustomCategoryLoader {
         ConfigurationSection condSec = sec.getConfigurationSection("conditions");
         if (condSec != null) {
             for (String dirKey : condSec.getKeys(false)) {
-                CustomGeneratorCategory.Direction dir = CustomGeneratorCategory.Direction.valueOf(dirKey.toUpperCase());
+                CustomGeneratorCategory.Direction dir = CustomGeneratorCategory.Direction.valueOf(dirKey.toUpperCase(Locale.ENGLISH));
                 List<Material> materials = condSec.getStringList(dirKey).stream()
                         .map(Material::matchMaterial)
                         .filter(Objects::nonNull)

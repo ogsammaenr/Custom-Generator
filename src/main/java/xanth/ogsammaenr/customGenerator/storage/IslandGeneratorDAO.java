@@ -3,9 +3,11 @@ package xanth.ogsammaenr.customGenerator.storage;
 import com.google.gson.GsonBuilder;
 import org.bukkit.Bukkit;
 import xanth.ogsammaenr.customGenerator.CustomGenerator;
+import xanth.ogsammaenr.customGenerator.manager.CustomCategoryManager;
 import xanth.ogsammaenr.customGenerator.manager.IslandGeneratorManager;
 import xanth.ogsammaenr.customGenerator.model.GeneratorCategory;
 import xanth.ogsammaenr.customGenerator.model.GeneratorType;
+import xanth.ogsammaenr.customGenerator.model.IGeneratorCategory;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -14,12 +16,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 public class IslandGeneratorDAO {
     private final CustomGenerator plugin;
+
     private final DatabaseConnector connector;
 
     public IslandGeneratorDAO(CustomGenerator plugin, DatabaseConnector connector) {
@@ -42,9 +46,9 @@ public class IslandGeneratorDAO {
     ///         YÜKLEME METODLARI
     ///     ----------------------------
 
-    public void loadAll(IslandGeneratorManager manager) {
+    public void loadAll(IslandGeneratorManager manager, CustomCategoryManager categoryManager) {
         loadOwnedGenerators(manager);
-        loadActiveGenerators(manager);
+        loadActiveGenerators(manager, categoryManager);
     }
 
     private void loadOwnedGenerators(IslandGeneratorManager manager) {
@@ -67,7 +71,7 @@ public class IslandGeneratorDAO {
         }
     }
 
-    private void loadActiveGenerators(IslandGeneratorManager manager) {
+    private void loadActiveGenerators(IslandGeneratorManager manager, CustomCategoryManager customCategoryManager) {
         String sql = "SELECT island_id, generator_category, generator_type FROM active_generators";
         try (Connection conn = connector.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -78,13 +82,19 @@ public class IslandGeneratorDAO {
                 String categoryStr = rs.getString("generator_category");
                 String typeId = rs.getString("generator_type");
 
-                GeneratorCategory category;
-                try {
-                    category = GeneratorCategory.valueOf(categoryStr.toUpperCase());
-                } catch (IllegalArgumentException e) {
-                    plugin.getLogger().warning("Geçersiz kategori: " + categoryStr);
+                IGeneratorCategory category = null;
+                plugin.getLogger().info("generator : " + categoryStr);
+                if (Arrays.stream(GeneratorCategory.values()).anyMatch(cat -> cat.getId().equalsIgnoreCase(categoryStr))) {
+                    plugin.getLogger().info("Vanilla Generator Yüklendi : " + categoryStr);
+                    category = GeneratorCategory.valueOf(categoryStr);
+                } else if (customCategoryManager.getCategoryMap().containsKey(categoryStr)) {
+                    plugin.getLogger().info("Custom Generator Yüklendi : " + categoryStr);
+                    category = customCategoryManager.getCategoryMap().get(categoryStr);
+                } else {
+                    plugin.getLogger().info(categoryStr + " hiçbir yere giremedi");
                     continue;
                 }
+
 
                 GeneratorType type = manager.getRegisteredType(typeId);
                 if (type != null && type.getGeneratorCategory() == category) {
@@ -131,11 +141,11 @@ public class IslandGeneratorDAO {
         try (Connection conn = connector.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            for (Map.Entry<String, Map<GeneratorCategory, String>> entry : manager.getActiveGeneratorTypes().entrySet()) {
+            for (Map.Entry<String, Map<IGeneratorCategory, String>> entry : manager.getActiveGeneratorTypes().entrySet()) {
                 String islandId = entry.getKey();
-                for (Map.Entry<GeneratorCategory, String> active : entry.getValue().entrySet()) {
+                for (Map.Entry<IGeneratorCategory, String> active : entry.getValue().entrySet()) {
                     ps.setString(1, islandId);
-                    ps.setString(2, active.getKey().name());
+                    ps.setString(2, active.getKey().getId());
                     ps.setString(3, active.getValue());
                     ps.addBatch();
                 }

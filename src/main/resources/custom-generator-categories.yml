@@ -2,7 +2,7 @@ custom-categories:
   dirt_generator:
     category: DIRTGEN
     fluid: LAVA
-    to: WATER
+    to: AIR
     conditions:
       sides: [ DIRT ]
       up: [ STONE ]

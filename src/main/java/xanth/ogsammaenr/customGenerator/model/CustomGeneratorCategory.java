@@ -100,6 +100,20 @@ public class CustomGeneratorCategory implements IGeneratorCategory {
         return biomes;
     }
 
+    @Override
+    public String toString() {
+        return "CustomGeneratorCategory{" +
+               "categoryId='" + categoryId + '\'' +
+               ", displayName='" + displayName + '\'' +
+               ", fluid=" + fluid +
+               ", to=" + to +
+               ", blockConditions=" + blockConditions +
+               ", minYLevel=" + minYLevel +
+               ", maxYLevel=" + maxYLevel +
+               ", biomes=" + biomes +
+               '}';
+    }
+
     public enum Direction {
         SIDES,
         UP,

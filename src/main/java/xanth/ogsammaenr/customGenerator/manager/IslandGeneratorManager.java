@@ -3,6 +3,7 @@ package xanth.ogsammaenr.customGenerator.manager;
 import xanth.ogsammaenr.customGenerator.CustomGenerator;
 import xanth.ogsammaenr.customGenerator.model.GeneratorCategory;
 import xanth.ogsammaenr.customGenerator.model.GeneratorType;
+import xanth.ogsammaenr.customGenerator.model.IGeneratorCategory;
 import xanth.ogsammaenr.customGenerator.storage.IslandGeneratorDAO;
 
 import java.util.*;
@@ -10,9 +11,10 @@ import java.util.*;
 public class IslandGeneratorManager {
     private final CustomGenerator plugin;
     private final IslandGeneratorDAO dao;
+    private final CustomCategoryManager customCatManager;
 
     /// Ada ID → Kategori → Aktif jeneratör tipi ID
-    private final Map<String, Map<GeneratorCategory, String>> activeGeneratorTypes = new HashMap<>();
+    private final Map<String, Map<IGeneratorCategory, String>> activeGeneratorTypes = new HashMap<>();
 
     /// Ada ID → Satın alınan jeneratör tipi ID
     private final Map<String, Set<String>> ownedGeneratorTypes = new HashMap<>();
@@ -23,6 +25,7 @@ public class IslandGeneratorManager {
     public IslandGeneratorManager(CustomGenerator plugin, IslandGeneratorDAO islandGeneratorDAO) {
         this.plugin = plugin;
         this.dao = islandGeneratorDAO;
+        this.customCatManager = plugin.getCustomCategoryManager();
     }
 
     // ==========================
@@ -42,13 +45,19 @@ public class IslandGeneratorManager {
     }
 
     /// Ada için aktif jeneratör tipi ID'sini al
-    public String getGeneratorTypeId(String islandId, GeneratorCategory category) {
+    public String getGeneratorTypeId(String islandId, IGeneratorCategory category) {
         return activeGeneratorTypes.getOrDefault(islandId, Collections.emptyMap()).get(category);
     }
 
     /// Ada için aktif jeneratör tipi nesnesini al
-    public GeneratorType getGeneratorType(String islandId, GeneratorCategory category) {
-        String typeId = getGeneratorTypeId(islandId, category);
+    public GeneratorType getGeneratorType(String islandId, String categoryId) {
+        String typeId = null;
+        if (Arrays.stream(GeneratorCategory.values()).toList().contains(categoryId)) {
+            typeId = getGeneratorTypeId(islandId, GeneratorCategory.valueOf(categoryId));
+        } else if (customCatManager.getCategoryMap().containsKey(categoryId)) {
+            typeId = getGeneratorTypeId(islandId, customCatManager.getCategoryById(categoryId));
+        }
+
         return typeId == null ? null : registeredTypes.get(typeId);
     }
 
@@ -75,8 +84,8 @@ public class IslandGeneratorManager {
     }
 
     /// Belirli bir adadaki belirli bir kategorideki jeneratör bilgisini kaldırır
-    public void removeGeneratorType(String islandId, GeneratorCategory category) {
-        Map<GeneratorCategory, String> categoryMap = activeGeneratorTypes.get(islandId);
+    public void removeGeneratorType(String islandId, IGeneratorCategory category) {
+        Map<IGeneratorCategory, String> categoryMap = activeGeneratorTypes.get(islandId);
         if (categoryMap != null) {
             categoryMap.remove(category);
 
@@ -98,14 +107,14 @@ public class IslandGeneratorManager {
         GeneratorType type = getRegisteredType(generatorTypeId);
         if (type == null) return false;
 
-        Map<GeneratorCategory, String> activeTypes = activeGeneratorTypes.get(islandId);
+        Map<IGeneratorCategory, String> activeTypes = activeGeneratorTypes.get(islandId);
         if (activeTypes == null) return false;
 
         String activeId = activeTypes.get(type.getGeneratorCategory());
         return generatorTypeId.equals(activeId);
     }
 
-    public Map<GeneratorCategory, String> getActiveTypes(String islandId) {
+    public Map<IGeneratorCategory, String> getActiveTypes(String islandId) {
         return activeGeneratorTypes.getOrDefault(islandId, Collections.emptyMap());
     }
 
@@ -142,8 +151,12 @@ public class IslandGeneratorManager {
         return ownedGeneratorTypes;
     }
 
-    public Map<String, Map<GeneratorCategory, String>> getActiveGeneratorTypes() {
+    public Map<String, Map<IGeneratorCategory, String>> getActiveGeneratorTypes() {
         return activeGeneratorTypes;
+    }
+
+    public void loadAll() {
+        dao.loadAll(this, customCatManager);
     }
 
 

@@ -69,7 +69,10 @@ public class FertilizeListener implements Listener {
             BlockState state = iterator.next();
             Block target = state.getBlock();
 
-            if (target.getLocation().distanceSquared(loc) > 4 || !allowed.contains(target.getType()) || random.nextDouble(1) < 0.5) {
+            if (target.getLocation().distanceSquared(loc) > 4
+                || !allowed.contains(target.getType())
+                || target.getType().equals(Material.TALL_GRASS)
+                || random.nextDouble(1) < 0.5) {
                 iterator.remove();
             }
         }

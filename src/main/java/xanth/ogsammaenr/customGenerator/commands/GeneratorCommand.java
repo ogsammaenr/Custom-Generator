@@ -16,6 +16,7 @@ import world.bentobox.bentobox.database.objects.Island;
 import world.bentobox.bentobox.managers.IslandsManager;
 import xanth.ogsammaenr.customGenerator.CustomGenerator;
 import xanth.ogsammaenr.customGenerator.gui.GeneratorMenu;
+import xanth.ogsammaenr.customGenerator.manager.CustomCategoryManager;
 import xanth.ogsammaenr.customGenerator.manager.IslandGeneratorManager;
 import xanth.ogsammaenr.customGenerator.manager.MessagesManager;
 import xanth.ogsammaenr.customGenerator.model.GeneratorType;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 public class GeneratorCommand implements CommandExecutor, TabCompleter {
     private final CustomGenerator plugin;
     private final IslandGeneratorManager generatorManager;
+    private final CustomCategoryManager categoryManager;
     private final Economy economy;
     private final IslandsManager islandsManager;
     private final IslandUtils islandUtils;
@@ -39,6 +41,7 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
     public GeneratorCommand(CustomGenerator plugin) {
         this.plugin = plugin;
         this.generatorManager = plugin.getIslandGeneratorManager();
+        this.categoryManager = plugin.getCustomCategoryManager();
         this.economy = plugin.getEconomyManager().getEconomy();
         this.islandsManager = BentoBox.getInstance().getIslandsManager();
         this.islandUtils = plugin.getIslandUtils();
@@ -179,8 +182,13 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
+        plugin.getCustomCategoryLoader().loadCustomCategories();
         plugin.getTypeLoader().loadGeneratorTypes();
         messages.reload();
+
+        generatorManager.getActiveGeneratorTypes().clear();
+        generatorManager.getOwnedGeneratorTypes().clear();
+        generatorManager.loadAll();
 
         player.sendMessage(messages.get("commands.reload.success"));
     }

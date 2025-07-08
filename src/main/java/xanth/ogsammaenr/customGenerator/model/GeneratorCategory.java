@@ -1,5 +1,8 @@
 package xanth.ogsammaenr.customGenerator.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public enum GeneratorCategory implements IGeneratorCategory {
     COBBLESTONE(""),
     STONE(""),
@@ -25,5 +28,13 @@ public enum GeneratorCategory implements IGeneratorCategory {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public List<String> idList() {
+        List<String> list = new ArrayList<String>();
+        for (GeneratorCategory category : GeneratorCategory.values()) {
+            list.add(category.getId());
+        }
+        return list;
     }
 }
