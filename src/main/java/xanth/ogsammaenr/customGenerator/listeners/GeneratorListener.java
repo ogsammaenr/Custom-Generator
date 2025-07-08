@@ -43,9 +43,15 @@ public class GeneratorListener implements Listener {
         Material liquid = source.getType();
 
         //  Liquid Check
-        if (!source.isLiquid()) return;
-        if (source == target) return;
-        if (target.getType().equals(liquid)) return;
+        if (!source.isLiquid()) {
+            return;
+        }
+        if (source == target) {
+            return;
+        }
+        if (target.getType().equals(liquid)) {
+            return;
+        }
 
         //  Get Island
         Optional<Island> islandOpt = islandsManager.getIslandAt(event.getBlock().getLocation());
@@ -60,10 +66,12 @@ public class GeneratorListener implements Listener {
 
         if (matched != null) {
             GeneratorType generator = generatorManager.getGeneratorType(island.getUniqueId(), matched.getId());
+
             if (generator != null) {
                 Material result = pickResult(generator.getBlockChances());
                 if (result != null) {
                     target.setType(result, false);
+
                     playEffects(target);
                     event.setCancelled(true);
                     return;
@@ -99,7 +107,9 @@ public class GeneratorListener implements Listener {
             }
         }
 
-        if (type == null) return;
+        if (type == null) {
+            return;
+        }
 
         GeneratorType generatorType = null;
         if (type == Material.STONE
@@ -115,8 +125,6 @@ public class GeneratorListener implements Listener {
         if (generatorType == null) {
             return;
         }
-
-        event.setCancelled(true);
 
         Material result = pickResult(generatorType.getBlockChances());
         blockToChange.setType(result, false);
@@ -148,6 +156,7 @@ public class GeneratorListener implements Listener {
         for (Map.Entry<CustomGeneratorCategory.Direction, List<Material>> e : conds.entrySet()) {
             if (!hasRequiredNeighbor(target, e.getKey(), e.getValue())) return false;
         }
+
         return true;
     }
 

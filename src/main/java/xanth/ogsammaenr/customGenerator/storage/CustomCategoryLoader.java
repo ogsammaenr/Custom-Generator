@@ -50,6 +50,7 @@ public class CustomCategoryLoader {
             return;
         }
         manager.clear();
+        manager.getRelevantBlockMaterials().clear();
 
         for (String key : section.getKeys(false)) {
             ConfigurationSection catsec = section.getConfigurationSection(key);
@@ -59,6 +60,11 @@ public class CustomCategoryLoader {
                 CustomGeneratorCategory category = parseCategory(key, catsec);
                 manager.addCategory(category);
                 plugin.getLogger().info(category.getId() + " : " + category.toString());
+
+                EnumMap<CustomGeneratorCategory.Direction, List<Material>> map = category.getBlockConditions();
+                for (List<Material> materialList : map.values()) {
+                    manager.getRelevantBlockMaterials().addAll(materialList);
+                }
             } catch (Exception e) {
                 plugin.getLogger().warning("Failed to load custom category '" + key + "': " + e.getMessage());
             }

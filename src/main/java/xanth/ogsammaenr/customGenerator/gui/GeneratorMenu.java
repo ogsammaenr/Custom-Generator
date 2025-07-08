@@ -16,6 +16,7 @@ import xanth.ogsammaenr.customGenerator.manager.IslandGeneratorManager;
 import xanth.ogsammaenr.customGenerator.manager.MessagesManager;
 import xanth.ogsammaenr.customGenerator.model.GeneratorCategory;
 import xanth.ogsammaenr.customGenerator.model.GeneratorType;
+import xanth.ogsammaenr.customGenerator.model.IGeneratorCategory;
 import xanth.ogsammaenr.customGenerator.util.ItemBuilder;
 
 import java.util.Comparator;
@@ -35,14 +36,14 @@ public class GeneratorMenu {
         this.messages = plugin.getMessagesManager();
     }
 
-    public void openMenu(Player player, @Nullable GeneratorCategory selectedCategory) {
+    public void openMenu(Player player, @Nullable IGeneratorCategory selectedCategory) {
         List<GeneratorType> types = manager.getAllRegisteredTypes().values().stream()
                 .filter(type -> selectedCategory == null || type.getGeneratorCategory() == selectedCategory)
                 .sorted(Comparator.comparingInt(GeneratorType::getPriority))
                 .collect(Collectors.toList());
 
         int size = 5 * 9;
-        Inventory gui = Bukkit.createInventory(null, size, messages.get("gui.title") + "§7 - " + (selectedCategory == null ? "ALL" : selectedCategory.name()));
+        Inventory gui = Bukkit.createInventory(null, size, messages.get("gui.title") + "§7 - " + (selectedCategory == null ? "ALL" : selectedCategory.getId()));
 
         //  ********** Filler Items **********
         ItemStack lineFiller = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE)
@@ -90,13 +91,7 @@ public class GeneratorMenu {
                     .build();
         }
         gui.setItem(6, allCategory);
-
-        if (selectedCategory != null) {
-            gui.setItem(40, new ItemBuilder(Material.RED_CANDLE)
-                    .setDisplayName(messages.get("gui.remove-button"))
-                    .setNBT("deactivate", selectedCategory.name())
-                    .build());
-        }
+        
 
         //  **********  Generator Type Items **********
 
@@ -120,7 +115,9 @@ public class GeneratorMenu {
             builder.addLoreLine("");
 
             if (isActive) {
+                builder.addLoreLine(messages.get("gui.click-to-deactivate"));
                 builder.setNBT("is_owned", "active");
+                builder.setNBT("deactivate", type.getGeneratorCategory().getId());
             } else if (isOwned) {
                 builder.addLoreLine(messages.get("gui.click-to-activate"));
                 builder.setNBT("is_owned", "true");

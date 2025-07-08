@@ -20,6 +20,7 @@ import xanth.ogsammaenr.customGenerator.manager.CustomCategoryManager;
 import xanth.ogsammaenr.customGenerator.manager.IslandGeneratorManager;
 import xanth.ogsammaenr.customGenerator.manager.MessagesManager;
 import xanth.ogsammaenr.customGenerator.model.GeneratorType;
+import xanth.ogsammaenr.customGenerator.model.IGeneratorCategory;
 import xanth.ogsammaenr.customGenerator.util.IslandUtils;
 
 import java.util.*;
@@ -183,12 +184,23 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
         }
 
         plugin.getCustomCategoryLoader().loadCustomCategories();
-        plugin.getTypeLoader().loadGeneratorTypes();
+
+        Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
+            @Override
+            public void run() {
+                plugin.getTypeLoader().loadGeneratorTypes();
+
+                generatorManager.reloadActiveGeneratorTypes();
+            }
+        }, 5);
+
         messages.reload();
 
-        generatorManager.getActiveGeneratorTypes().clear();
-        generatorManager.getOwnedGeneratorTypes().clear();
-        generatorManager.loadAll();
+        for (Map<IGeneratorCategory, String> asdf : generatorManager.getActiveGeneratorTypes().values()) {
+            for (String asd : asdf.values()) {
+                player.sendMessage(asd);
+            }
+        }
 
         player.sendMessage(messages.get("commands.reload.success"));
     }

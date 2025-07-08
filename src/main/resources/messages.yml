@@ -42,6 +42,7 @@ gui:
   remove-button: "&7Remove generator"
   click-to-activate: "&7Click to &eactivate"
   click-to-buy: "&7Click to &ebuy"
+  click-to-deactivate: "&7Click to &edeactivate"
   deactivate: "&e%category% &agenerator deactivated"
 
 generator-category:

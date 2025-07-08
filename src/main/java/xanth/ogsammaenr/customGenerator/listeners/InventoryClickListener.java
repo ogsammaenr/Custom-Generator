@@ -15,10 +15,12 @@ import world.bentobox.bentobox.database.objects.Island;
 import world.bentobox.bentobox.managers.IslandsManager;
 import xanth.ogsammaenr.customGenerator.CustomGenerator;
 import xanth.ogsammaenr.customGenerator.gui.GeneratorMenu;
+import xanth.ogsammaenr.customGenerator.manager.CustomCategoryManager;
 import xanth.ogsammaenr.customGenerator.manager.IslandGeneratorManager;
 import xanth.ogsammaenr.customGenerator.manager.MessagesManager;
 import xanth.ogsammaenr.customGenerator.model.GeneratorCategory;
 import xanth.ogsammaenr.customGenerator.model.GeneratorType;
+import xanth.ogsammaenr.customGenerator.model.IGeneratorCategory;
 import xanth.ogsammaenr.customGenerator.util.IslandUtils;
 
 import java.util.Map;
@@ -31,6 +33,7 @@ public class InventoryClickListener implements Listener {
     private final IslandUtils islandUtils;
     private final Economy economy;
     private final MessagesManager messages;
+    private final CustomCategoryManager customCatManager;
 
     public InventoryClickListener(CustomGenerator plugin) {
         this.plugin = plugin;
@@ -39,6 +42,7 @@ public class InventoryClickListener implements Listener {
         this.islandUtils = plugin.getIslandUtils();
         this.economy = plugin.getEconomyManager().getEconomy();
         this.messages = plugin.getMessagesManager();
+        this.customCatManager = plugin.getCustomCategoryManager();
     }
 
 
@@ -112,25 +116,29 @@ public class InventoryClickListener implements Listener {
                 }, 3L);
 
                 player.sendMessage(messages.getFormatted("commands.buy.success", Map.of("generator", type.getDisplayName(), "price", String.valueOf(price))));
+            } else if (deactivate != null) {
+                IGeneratorCategory category = null;
+                try {
+                    category = GeneratorCategory.valueOf(deactivate);
+                } catch (IllegalArgumentException ex) {
+                    if (customCatManager.getCategoryMap().containsKey(deactivate)) {
+                        category = customCatManager.getCategoryById(deactivate);
+                    }
+                }
+
+                manager.removeGeneratorType(island.getUniqueId(), category);
+
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    new GeneratorMenu(CustomGenerator.getInstance()).openMenu(player, selectedCategory);
+                }, 3L);
+
+                player.sendMessage(messages.getFormatted("gui.deactivate", Map.of("category", category.getDisplayName())));
+
+
             }
-        } else if (deactivate != null) {
-            Optional<Island> optionalIsland = islandsManager.getIslandAt(player.getLocation());
-            if (optionalIsland.isEmpty()) {
-                player.sendMessage(messages.get("commands.general.no-island"));
-                return;
-            }
-            Island island = optionalIsland.get();
-            manager.removeGeneratorType(island.getUniqueId(), GeneratorCategory.valueOf(deactivate));
-
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                new GeneratorMenu(CustomGenerator.getInstance()).openMenu(player, GeneratorCategory.valueOf(deactivate));
-            }, 3L);
-
-            player.sendMessage(messages.getFormatted("gui.deactivate", Map.of("category", GeneratorCategory.valueOf(deactivate).getDisplayName())));
-
-
         }
     }
+
 
     private static String getStringTag(ItemStack item, String key) {
         CustomGenerator plugin = CustomGenerator.getInstance();

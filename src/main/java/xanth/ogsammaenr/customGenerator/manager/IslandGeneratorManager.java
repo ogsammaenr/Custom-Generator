@@ -52,10 +52,13 @@ public class IslandGeneratorManager {
     /// Ada için aktif jeneratör tipi nesnesini al
     public GeneratorType getGeneratorType(String islandId, String categoryId) {
         String typeId = null;
-        if (Arrays.stream(GeneratorCategory.values()).toList().contains(categoryId)) {
-            typeId = getGeneratorTypeId(islandId, GeneratorCategory.valueOf(categoryId));
-        } else if (customCatManager.getCategoryMap().containsKey(categoryId)) {
-            typeId = getGeneratorTypeId(islandId, customCatManager.getCategoryById(categoryId));
+        try {
+            GeneratorCategory category = GeneratorCategory.valueOf(categoryId);
+            typeId = getGeneratorTypeId(islandId, category);
+        } catch (IllegalArgumentException ex) {
+            if (customCatManager.getCategoryMap().containsKey(categoryId)) {
+                typeId = getGeneratorTypeId(islandId, customCatManager.getCategoryById(categoryId));
+            }
         }
 
         return typeId == null ? null : registeredTypes.get(typeId);
@@ -114,6 +117,23 @@ public class IslandGeneratorManager {
         return generatorTypeId.equals(activeId);
     }
 
+    public void reloadActiveGeneratorTypes() {
+        for (String islandId : activeGeneratorTypes.keySet()) {
+            Map<IGeneratorCategory, String> currentTypes = activeGeneratorTypes.get(islandId);
+
+            Map<IGeneratorCategory, String> updatedTypes = new HashMap<>();
+            for (Map.Entry<IGeneratorCategory, String> entry : currentTypes.entrySet()) {
+                String typeId = entry.getValue();
+                GeneratorType type = registeredTypes.get(typeId);
+                if (type != null) {
+                    updatedTypes.put(type.getGeneratorCategory(), typeId);
+                }
+            }
+
+            activeGeneratorTypes.put(islandId, updatedTypes);
+        }
+    }
+
     public Map<IGeneratorCategory, String> getActiveTypes(String islandId) {
         return activeGeneratorTypes.getOrDefault(islandId, Collections.emptyMap());
     }
@@ -153,10 +173,6 @@ public class IslandGeneratorManager {
 
     public Map<String, Map<IGeneratorCategory, String>> getActiveGeneratorTypes() {
         return activeGeneratorTypes;
-    }
-
-    public void loadAll() {
-        dao.loadAll(this, customCatManager);
     }
 
 

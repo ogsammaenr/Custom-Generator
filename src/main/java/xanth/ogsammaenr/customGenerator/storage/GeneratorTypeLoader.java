@@ -59,7 +59,7 @@ public class GeneratorTypeLoader {
             List<String> coloredLore = lore.stream()
                     .map(line -> ChatColor.translateAlternateColorCodes('&', line))
                     .collect(Collectors.toList());
-            String categoryName = genSec.getString("generator-type", "COBBLESTONE").toUpperCase();
+            String categoryName = genSec.getString("generator-type");
 
             IGeneratorCategory category = plugin.getCustomCategoryManager().getCategoryById(categoryName);
             if (category == null) {
