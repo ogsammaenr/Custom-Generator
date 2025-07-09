@@ -11,12 +11,59 @@
 
 generator-types:
 
+  dirt_generator:
+    display-name: "&2Dirt Generator"
+    material: DIRT
+    lore:
+      - "&7Basic dirt generator."
+      - "&7Produces :"
+      - "&8  - Dirt : %70"
+      - "&8  - Coarse Dirt : %30"
+    generator-type: DIRTGEN
+    price: 500
+    required-island-level: 1
+    blocks:
+      DIRT: 70
+      COARSE_DIRT: 30
+
+    sky_ice:
+      display-name: "&bSky Ice Generator"
+      material: PACKED_ICE
+      lore:
+        - "&7High altitude ice generator."
+        - "&7Produces :"
+        - "&8  - Packed Ice : %60"
+        - "&8  - Snow Block : %40"
+      generator-type: SKYGEN
+      price: 3000
+      required-island-level: 20
+      blocks:
+        PACKED_ICE: 60
+        SNOW_BLOCK: 40
+
+    advanced_stone:
+      display-name: "&7Advanced Stone Generator"
+      material: GILDED_BLACKSTONE
+      lore:
+        - "&7Special generator using lava-water interaction."
+        - "&7Produces :"
+        - "&8  - Stone : %50"
+        - "&8  - Gilded Blackstone : %50"
+      generator-type: ADVSTONE
+      price: 4000
+      required-island-level: 25
+      blocks:
+        STONE: 50
+        GILDED_BLACKSTONE: 50
+
   coal:
     display-name: "&7Coal Generator"                # Display name shown in the GUI
     material: COAL_ORE                              # Icon material for the GUI (Bukkit Material)
     lore: # Description shown in the GUI
       - "&8A simple generator type."
-      - "&7Produces 60% stone and 40% coal."
+      - "&7Produces :"
+      - "&8  - Stone : %60"
+      - "&8  - Coal Ore : %40"
     generator-type: COBBLESTONE                     # Generator category (see category list below)
     price: 1000                                     # Purchase cost (Vault economy)
     required-island-level: 5                        # Minimum island level required to purchase
@@ -29,7 +76,9 @@ generator-types:
     material: IRON_ORE
     lore:
       - "&7Mid-tier generator."
-      - "&7Produces 50% stone and 50% iron."
+      - "&7Produces : "
+      - "&8  - Stone : % 50"
+      - "&8  - Iron Ore : %50"
     generator-type: COBBLESTONE
     price: 2500
     required-island-level: 15
@@ -42,7 +91,9 @@ generator-types:
     material: DIAMOND_ORE
     lore:
       - "&bContains the rarest resources."
-      - "&7Produces 30% diamond and 70% stone."
+      - "&7Produces :"
+      - "&8  - Stone : %70"
+      - "&8  - Diamond Ore : % 30"
     generator-type: COBBLESTONE
     price: 5000
     required-island-level: 30
@@ -56,10 +107,10 @@ generator-types:
     lore:
       - "&7Stones and stone types"
       - "&7Produces :"
-      - " - Stone: %40"
-      - " - Andesite: %20"
-      - " - Granite: %20"
-      - " - Diorite: %20"
+      - "&8  - Stone: %40"
+      - "&8  - Andesite: %20"
+      - "&8  - Granite: %20"
+      - "&8  - Diorite: %20"
     generator-type: STONE
     price: 1000
     required-island-level: 50
@@ -75,10 +126,10 @@ generator-types:
     lore:
       - "&b7Nether material"
       - "&7Produces :"
-      - " - Basalt: %40"
-      - " - Netherrack: %20"
-      - " - Blackstone: %20"
-      - " - Nether gold ore: %20"
+      - "&8  - Basalt: %40"
+      - "&8  - Netherrack: %20"
+      - "&8  - Blackstone: %20"
+      - "&8  - Nether gold ore: %20"
     generator-type: BASALT
     price: 2000
     required-island-level: 300
@@ -94,9 +145,9 @@ generator-types:
     lore:
       - "&b7Deepslate and Deepslate types"
       - "&7Produces :"
-      - " - Deepslate: %40"
-      - " - Tuff: %30"
-      - " - Calcıte: %30"
+      - "&8  - Deepslate: %40"
+      - "&8  - Tuff: %30"
+      - "&8  - Calcıte: %30"
     generator-type: DEEPSLATE
     price: 3000
     required-island-level: 1000

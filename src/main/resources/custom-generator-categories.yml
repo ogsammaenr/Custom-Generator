@@ -1,15 +1,87 @@
+# ===========================================================
+#     ⚙️ CUSTOM GENERATOR CATEGORIES - custom-categories.yml
+#
+# This file defines custom generator categories based on
+# fluid and block combinations.
+#
+# Each category determines when a generator type is triggered
+# based on surroundings like block type, y-level, biome, etc.
+#
+# NOTE: Use valid Bukkit Material names for all block types.
+#       List of all materials: 
+#       https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
+# ===========================================================
+
 custom-categories:
+
+  # 🔹 EXAMPLE CATEGORY: dirt_generator
+  # This category activates when lava flows into air,
+  # and specific surrounding block conditions are met.
   dirt_generator:
-    category: DIRTGEN
-    fluid: LAVA
-    to: AIR
+    category: DIRTGEN                        # Unique ID for this generator category. Must match a generator-type in generator-types.yml
+    display-name: "&2Dirt"                   # Display name shown in the GUI
+    fluid: LAVA                              # The fluid that triggers the generator (e.g., LAVA or WATER)
+    to: AIR                                  # The block the fluid flows into (e.g., AIR, STONE)
+
     conditions:
-      sides: [ DIRT ]
-      up: [ STONE ]
-      down: [ AIR ]
+      sides: [ DIRT ]                        # Blocks that must be on the four horizontal sides of the flowing fluid
+      up: [ STONE ]                          # Block above the flowing fluid
+      down: [ COARSE_DIRT ]                          # Block below the flowing fluid
+
     y-level:
-      min: 10
-      max: 64
-    biomes:
+      min: 10                                # Minimum Y level where this generator is valid
+      max: 64                                # Maximum Y level where this generator is valid
+
+    biomes: # List of biomes where this generator is allowed
       - minecraft:plains
       - minecraft:the_void
+
+  sky_ice:
+    category: SKYGEN
+    display-name: "&bSky Ice"
+    fluid: WATER
+    conditions:
+      up: [ SNOW_BLOCK ]
+      sides: [ PACKED_ICE ]
+    y-level:
+      min: 280
+      max: 320
+
+  advanced_stone:
+    category: ADVSTONE
+    display-name: "&7Advanced Stone"
+    fluid: LAVA
+    to: WATER
+    conditions:
+      sides: [ GILDED_BLACKSTONE ]
+
+
+# ===========================================================
+# 📘 EXPLANATIONS
+# ===========================================================
+
+# 🔸 category:
+# The internal ID of the generator category.
+# It must match the `generator-type` field used in generator-types.yml.
+
+# 🔸 display-name:
+# The name displayed in the GUI. Supports Minecraft color codes (&a, &b, etc.).
+
+# 🔸 fluid:
+# The source fluid type that triggers generation. Usually LAVA or WATER.
+
+# 🔸 to:
+# The block the fluid flows into. Commonly AIR, POWDER_SNOW, WATER etc.
+
+# 🔸 conditions:
+# Define blocks around the fluid to create advanced generation logic.
+#   - sides: Blocks on the four cardinal sides (north, south, east, west)
+#   - up: Block directly above the fluid
+#   - down: Block directly below the fluid
+
+# 🔸 y-level:
+# Sets the vertical height range in which this generator is allowed to work.
+
+# 🔸 biomes:
+# Restricts the generator to specific biomes only.
+# Use valid Minecraft biome IDs like `minecraft:desert` or `minecraft:forest`.

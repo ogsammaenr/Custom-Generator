@@ -26,6 +26,10 @@ import xanth.ogsammaenr.customGenerator.util.IslandUtils;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Listens for inventory click events within the custom generator GUI and handles
+ * category navigation, generator purchase, activation, and deactivation logic.
+ */
 public class InventoryClickListener implements Listener {
     private final CustomGenerator plugin;
     private final IslandGeneratorManager manager;
@@ -35,6 +39,11 @@ public class InventoryClickListener implements Listener {
     private final MessagesManager messages;
     private final CustomCategoryManager customCatManager;
 
+    /**
+     * Initializes the listener with required managers and utilities.
+     *
+     * @param plugin main plugin instance
+     */
     public InventoryClickListener(CustomGenerator plugin) {
         this.plugin = plugin;
         this.manager = plugin.getIslandGeneratorManager();
@@ -45,7 +54,12 @@ public class InventoryClickListener implements Listener {
         this.customCatManager = plugin.getCustomCategoryManager();
     }
 
-
+    /**
+     * Handles clicking inside the generator menu. Cancels the click and interprets
+     * NBT tags to navigate categories or process generator buy/activate/deactivate actions.
+     *
+     * @param e the inventory click event
+     */
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
         if (!(e.getWhoClicked() instanceof Player player)) return;
@@ -56,101 +70,140 @@ public class InventoryClickListener implements Listener {
         e.setCancelled(true);
         String[] parts = e.getView().getTitle().split(" ");
         String selectedCategoryId = parts[parts.length - 1];
-        GeneratorCategory selectedCategory = selectedCategoryId.equals("ALL") ? null : GeneratorCategory.valueOf(selectedCategoryId);
 
+        // Determine selected category (built-in, custom, or all)
+        IGeneratorCategory selectedCategory;
+        if (selectedCategoryId.equals("ALL")) {
+            selectedCategory = null;
+        } else if (selectedCategoryId.equals("CUSTOM")) {
+            selectedCategory = customCatManager.getAllCategories().stream().findFirst().orElse(null);
+        } else {
+            selectedCategory = GeneratorCategory.valueOf(selectedCategoryId);
+        }
 
         ItemStack clicked = e.getCurrentItem();
         if (clicked == null || clicked.getType() == Material.AIR) return;
 
         String categoryId = getStringTag(clicked, "category");
-        String is_owned = getStringTag(clicked, "is_owned");
-        String generator_id = getStringTag(clicked, "generator_id");
+        String isOwned = getStringTag(clicked, "is_owned");
+        String generatorId = getStringTag(clicked, "generator_id");
         String deactivate = getStringTag(clicked, "deactivate");
+
+        // Category navigation
         if (categoryId != null) {
             if (categoryId.equals("ALL")) {
-                new GeneratorMenu(CustomGenerator.getInstance()).openMenu(player, null);
-                return;
+                new GeneratorMenu(plugin).openMenu(player, null);
+            } else if (categoryId.equals("CUSTOM")) {
+                new GeneratorMenu(plugin).openMenu(player,
+                        customCatManager.getAllCategories().stream().findFirst().orElse(null));
+            } else {
+                new GeneratorMenu(plugin).openMenu(player, GeneratorCategory.valueOf(categoryId));
             }
+            return;
+        }
 
-            new GeneratorMenu(CustomGenerator.getInstance()).openMenu(player, GeneratorCategory.valueOf(categoryId));
-        } else if (generator_id != null) {
-            GeneratorType type = manager.getRegisteredType(generator_id);
-
-            Optional<Island> optionalIsland = islandsManager.getIslandAt(player.getLocation());
-            if (optionalIsland.isEmpty()) {
-                player.sendMessage(messages.get("commands.general.no-island"));
-                return;
-            }
-            Island island = optionalIsland.get();
-            if (is_owned.equals("true")) {
-                manager.setGeneratorType(island.getUniqueId(), generator_id);
-
-                Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                    new GeneratorMenu(CustomGenerator.getInstance()).openMenu(player, selectedCategory);
-                }, 3L);
-                player.sendMessage(messages.getFormatted("commands.activate.success", Map.of("category", type.getGeneratorCategory().getDisplayName(), "generator", type.getDisplayName())));
-
-            } else if (is_owned.equals("false")) {
-                if (manager.islandOwnsType(island.getUniqueId(), generator_id)) {
-                    return;
-                }
-                /*      Seviye Kontrolü     */
-                long level = islandUtils.getIslandLevel(player.getUniqueId(), player.getWorld().getName());
-                if (level < type.getRequiredIslandLevel()) {
-                    player.sendMessage(messages.getFormatted("commands.buy.not-enough-level", Map.of("required_level", String.valueOf(type.getRequiredIslandLevel()))));
-                    return;
-                }
-
-                /*      Para Kontrolü       */
-                double price = type.getPrice();
-                if (!economy.has(player, price)) {
-                    player.sendMessage(messages.getFormatted("commands.buy.not-enough-money", Map.of("price", String.valueOf(price))));
-                    return;
-                }
-
-                economy.withdrawPlayer(player, price);
-                manager.addOwnedType(island.getUniqueId(), generator_id);
-
-                Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                    new GeneratorMenu(CustomGenerator.getInstance()).openMenu(player, selectedCategory);
-                }, 3L);
-
-                player.sendMessage(messages.getFormatted("commands.buy.success", Map.of("generator", type.getDisplayName(), "price", String.valueOf(price))));
-            } else if (deactivate != null) {
-                IGeneratorCategory category = null;
-                try {
-                    category = GeneratorCategory.valueOf(deactivate);
-                } catch (IllegalArgumentException ex) {
-                    if (customCatManager.getCategoryMap().containsKey(deactivate)) {
-                        category = customCatManager.getCategoryById(deactivate);
-                    }
-                }
-
-                manager.removeGeneratorType(island.getUniqueId(), category);
-
-                Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                    new GeneratorMenu(CustomGenerator.getInstance()).openMenu(player, selectedCategory);
-                }, 3L);
-
-                player.sendMessage(messages.getFormatted("gui.deactivate", Map.of("category", category.getDisplayName())));
-
-
-            }
+        // Generator purchase / activation / deactivation
+        if (deactivate != null) {
+            handleDeactivate(player, selectedCategory, deactivate);
+        } else if (generatorId != null) {
+            handleGeneratorAction(player, selectedCategory, generatorId, isOwned);
         }
     }
 
+    /**
+     * Processes buying or activating a generator based on NBT flags.
+     */
+    private void handleGeneratorAction(Player player, IGeneratorCategory selectedCategory,
+                                       String generatorId, String isOwned) {
+        GeneratorType type = manager.getRegisteredType(generatorId);
+        Optional<Island> opt = islandsManager.getIslandAt(player.getLocation());
+        if (opt.isEmpty()) {
+            player.sendMessage(messages.get("commands.general.no-island"));
+            return;
+        }
+        Island island = opt.get();
 
+        if (isOwned.equals("true")) {
+            // Activate generator
+            manager.setGeneratorType(island.getUniqueId(), generatorId);
+            reshowMenu(player, selectedCategory);
+            player.sendMessage(messages.getFormatted("commands.activate.success",
+                    Map.of("category", type.getGeneratorCategory().getDisplayName(),
+                            "generator", type.getDisplayName())));
+        } else {
+            // Buy generator
+            attemptPurchase(player, island.getUniqueId(), type, selectedCategory);
+        }
+    }
+
+    /**
+     * Attempts to purchase a generator, performing level and economy checks.
+     */
+    private void attemptPurchase(Player player, String islandId,
+                                 GeneratorType type, IGeneratorCategory selectedCategory) {
+        if (manager.islandOwnsType(islandId, type.getId())) return;
+        long level = islandUtils.getIslandLevel(player.getUniqueId(), player.getWorld().getName());
+        if (level < type.getRequiredIslandLevel()) {
+            player.sendMessage(messages.getFormatted("commands.buy.not-enough-level",
+                    Map.of("required_level", String.valueOf(type.getRequiredIslandLevel()))));
+            return;
+        }
+        double price = type.getPrice();
+        if (!economy.has(player, price)) {
+            player.sendMessage(messages.getFormatted("commands.buy.not-enough-money",
+                    Map.of("price", String.valueOf(price))));
+            return;
+        }
+        economy.withdrawPlayer(player, price);
+        manager.addOwnedType(islandId, type.getId());
+        reshowMenu(player, selectedCategory);
+        player.sendMessage(messages.getFormatted("commands.buy.success",
+                Map.of("generator", type.getDisplayName(), "price", String.valueOf(price))));
+    }
+
+    /**
+     * Handles deactivation of a generator type.
+     */
+    private void handleDeactivate(Player player, IGeneratorCategory selectedCategory,
+                                  String deactivate) {
+        IGeneratorCategory category = null;
+        try {
+            category = GeneratorCategory.valueOf(deactivate);
+        } catch (IllegalArgumentException ex) {
+            if (customCatManager.getCategoryMap().containsKey(deactivate)) {
+                category = customCatManager.getCategoryById(deactivate);
+            }
+        }
+        manager.removeGeneratorType(
+                islandsManager.getIslandAt(player.getLocation()).get().getUniqueId(),
+                category);
+        reshowMenu(player, selectedCategory);
+        player.sendMessage(messages.getFormatted("gui.deactivate",
+                Map.of("category", category.getDisplayName())));
+    }
+
+    /**
+     * Utility to reopen the generator menu after a short delay.
+     */
+    private void reshowMenu(Player player, IGeneratorCategory selectedCategory) {
+        Bukkit.getScheduler().runTaskLater(plugin, () ->
+                new GeneratorMenu(plugin).openMenu(player, selectedCategory), 3L);
+    }
+
+    /**
+     * Reads a string tag from the item's persistent data container.
+     *
+     * @param item the itemstack containing the tag
+     * @param key  the NBT key to read
+     * @return the stored string, or null if absent
+     */
     private static String getStringTag(ItemStack item, String key) {
         CustomGenerator plugin = CustomGenerator.getInstance();
         if (item == null || item.getItemMeta() == null) return null;
-
-        var meta = item.getItemMeta();
-        var container = meta.getPersistentDataContainer();
-        NamespacedKey namespacedKey = new NamespacedKey(plugin, key);
-
-        if (container.has(namespacedKey, PersistentDataType.STRING)) {
-            return container.get(namespacedKey, PersistentDataType.STRING);
-        }
-        return null;
+        var container = item.getItemMeta().getPersistentDataContainer();
+        NamespacedKey ns = new NamespacedKey(plugin, key);
+        return container.has(ns, PersistentDataType.STRING)
+                ? container.get(ns, PersistentDataType.STRING)
+                : null;
     }
 }

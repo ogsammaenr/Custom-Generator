@@ -20,7 +20,6 @@ import xanth.ogsammaenr.customGenerator.manager.CustomCategoryManager;
 import xanth.ogsammaenr.customGenerator.manager.IslandGeneratorManager;
 import xanth.ogsammaenr.customGenerator.manager.MessagesManager;
 import xanth.ogsammaenr.customGenerator.model.GeneratorType;
-import xanth.ogsammaenr.customGenerator.model.IGeneratorCategory;
 import xanth.ogsammaenr.customGenerator.util.IslandUtils;
 
 import java.util.*;
@@ -195,12 +194,6 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
         }, 5);
 
         messages.reload();
-
-        for (Map<IGeneratorCategory, String> asdf : generatorManager.getActiveGeneratorTypes().values()) {
-            for (String asd : asdf.values()) {
-                player.sendMessage(asd);
-            }
-        }
 
         player.sendMessage(messages.get("commands.reload.success"));
     }

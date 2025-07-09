@@ -82,6 +82,7 @@ public class GeneratorListener implements Listener {
         //  Vanilla Category
         Material type = null;
         Block blockToChange = target;
+        boolean isGenerateWithWater = false;
 
         // taş oluşup oluşmayacağını kontrol et
         if (canGenerateStone(liquid, target)) {
@@ -104,6 +105,7 @@ public class GeneratorListener implements Listener {
             if (lavaBlock != null) {
                 type = Material.COBBLESTONE;
                 blockToChange = lavaBlock;
+                isGenerateWithWater = true;
             }
         }
 
@@ -129,6 +131,8 @@ public class GeneratorListener implements Listener {
         Material result = pickResult(generatorType.getBlockChances());
         blockToChange.setType(result, false);
         playEffects(blockToChange);
+        if (!isGenerateWithWater)
+            event.setCancelled(true);
 
     }
 

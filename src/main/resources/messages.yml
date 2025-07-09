@@ -50,3 +50,5 @@ generator-category:
   stone: "&fStone"
   basalt: "&8Basalt"
   deepslate: "&3Deepslate"
+  all: "&aAll"
+  custom: "&5Custom Generators"

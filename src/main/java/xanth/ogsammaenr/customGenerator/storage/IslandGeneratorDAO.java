@@ -66,7 +66,7 @@ public class IslandGeneratorDAO {
                 }
             }
         } catch (SQLException e) {
-            plugin.getLogger().severe("Satın alınmış jeneratörleri yüklerken hata oluştu:");
+            plugin.getLogger().severe("Load owned generators failed: ");
             e.printStackTrace();
         }
     }
@@ -85,13 +85,10 @@ public class IslandGeneratorDAO {
                 IGeneratorCategory category = null;
                 plugin.getLogger().info("generator : " + categoryStr);
                 if (Arrays.stream(GeneratorCategory.values()).anyMatch(cat -> cat.getId().equalsIgnoreCase(categoryStr))) {
-                    plugin.getLogger().info("Vanilla Generator Yüklendi : " + categoryStr);
                     category = GeneratorCategory.valueOf(categoryStr);
                 } else if (customCategoryManager.getCategoryMap().containsKey(categoryStr)) {
-                    plugin.getLogger().info("Custom Generator Yüklendi : " + categoryStr);
                     category = customCategoryManager.getCategoryMap().get(categoryStr);
                 } else {
-                    plugin.getLogger().info(categoryStr + " hiçbir yere giremedi");
                     continue;
                 }
 
@@ -103,7 +100,7 @@ public class IslandGeneratorDAO {
             }
 
         } catch (SQLException e) {
-            plugin.getLogger().severe("Aktif jeneratörleri yüklerken hata oluştu:");
+            plugin.getLogger().severe("Load active generators failed: ");
             e.printStackTrace();
         }
     }
@@ -130,7 +127,7 @@ public class IslandGeneratorDAO {
             ps.executeBatch();
 
         } catch (SQLException e) {
-            plugin.getLogger().severe("Satın alınmış jeneratörler kaydedilirken hata oluştu:");
+            plugin.getLogger().severe("Save owned generators failed: ");
             e.printStackTrace();
         }
     }
@@ -154,7 +151,7 @@ public class IslandGeneratorDAO {
             ps.executeBatch();
 
         } catch (SQLException e) {
-            plugin.getLogger().severe("Aktif jeneratörler kaydedilirken hata oluştu:");
+            plugin.getLogger().severe("Save active generators failed: ");
             e.printStackTrace();
         }
     }
@@ -169,7 +166,7 @@ public class IslandGeneratorDAO {
         try (FileWriter writer = new FileWriter(file)) {
             new GsonBuilder().setPrettyPrinting().create().toJson(data, writer);
         } catch (IOException e) {
-            plugin.getLogger().warning("last-save.json dosyasına yazılamadı: " + e.getMessage());
+            plugin.getLogger().warning("Save To Json Failed: " + e.getMessage());
         }
     }
 
@@ -183,7 +180,7 @@ public class IslandGeneratorDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.executeUpdate();
         } catch (SQLException e) {
-            plugin.getLogger().warning("Aktif jeneratör verileri temizlenemedi: " + e.getMessage());
+            plugin.getLogger().warning("Clear Active Generators Failed : " + e.getMessage());
         }
     }
 
@@ -193,7 +190,7 @@ public class IslandGeneratorDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.executeUpdate();
         } catch (SQLException e) {
-            plugin.getLogger().warning("Sahip olunan jeneratör verileri temizlenemedi: " + e.getMessage());
+            plugin.getLogger().warning("Clear All Owned Generators Failed : " + e.getMessage());
         }
     }
 }

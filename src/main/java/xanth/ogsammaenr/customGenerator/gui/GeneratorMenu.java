@@ -12,8 +12,10 @@ import org.jetbrains.annotations.Nullable;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.database.objects.Island;
 import xanth.ogsammaenr.customGenerator.CustomGenerator;
+import xanth.ogsammaenr.customGenerator.manager.CustomCategoryManager;
 import xanth.ogsammaenr.customGenerator.manager.IslandGeneratorManager;
 import xanth.ogsammaenr.customGenerator.manager.MessagesManager;
+import xanth.ogsammaenr.customGenerator.model.CustomGeneratorCategory;
 import xanth.ogsammaenr.customGenerator.model.GeneratorCategory;
 import xanth.ogsammaenr.customGenerator.model.GeneratorType;
 import xanth.ogsammaenr.customGenerator.model.IGeneratorCategory;
@@ -25,95 +27,151 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Handles displaying the generator selection GUI.
+ * Supports filtering built-in and custom categories, and shows purchase/activation statuses.
+ */
 public class GeneratorMenu {
     private final CustomGenerator plugin;
     private final IslandGeneratorManager manager;
+    private final CustomCategoryManager categoryManager;
     private final MessagesManager messages;
 
+    /**
+     * Constructs the menu with necessary plugin managers.
+     *
+     * @param plugin main plugin instance
+     */
     public GeneratorMenu(CustomGenerator plugin) {
         this.plugin = plugin;
         this.manager = plugin.getIslandGeneratorManager();
         this.messages = plugin.getMessagesManager();
+        this.categoryManager = plugin.getCustomCategoryManager();
     }
 
+    /**
+     * Opens the generator GUI for a player.
+     *
+     * @param player           the player to open the menu for
+     * @param selectedCategory optional category to filter, null for all
+     */
     public void openMenu(Player player, @Nullable IGeneratorCategory selectedCategory) {
+        // Build filtered, sorted list of generator types
         List<GeneratorType> types = manager.getAllRegisteredTypes().values().stream()
-                .filter(type -> selectedCategory == null || type.getGeneratorCategory() == selectedCategory)
+                .filter(type -> selectedCategory == null
+                                || type.getGeneratorCategory() == selectedCategory
+                                || (type.getGeneratorCategory() instanceof CustomGeneratorCategory
+                                    && selectedCategory instanceof CustomGeneratorCategory))
                 .sorted(Comparator.comparingInt(GeneratorType::getPriority))
                 .collect(Collectors.toList());
 
         int size = 5 * 9;
-        Inventory gui = Bukkit.createInventory(null, size, messages.get("gui.title") + "§7 - " + (selectedCategory == null ? "ALL" : selectedCategory.getId()));
+        String title = determineTitle(selectedCategory);
+        Inventory gui = Bukkit.createInventory(null, size,
+                messages.get("gui.title") + "§7 - " + title);
 
-        //  ********** Filler Items **********
+        fillBackground(gui, size);
+        addCategoryButtons(gui, selectedCategory);
+        addCustomCategoryButton(gui, selectedCategory);
+        populateTypes(gui, player, selectedCategory, types);
+
+        player.openInventory(gui);
+    }
+
+    /**
+     * Determines the menu title based on selection.
+     */
+    private String determineTitle(@Nullable IGeneratorCategory selectedCategory) {
+        if (selectedCategory instanceof CustomGeneratorCategory) {
+            return "CUSTOM";
+        } else if (selectedCategory == null) {
+            return "ALL";
+        }
+        return selectedCategory.getId();
+    }
+
+    /**
+     * Fills GUI background with filler items.
+     */
+    private void fillBackground(Inventory gui, int size) {
         ItemStack lineFiller = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE)
-                .setDisplayName("§7")
-                .build();
+                .setDisplayName("§7").build();
         ItemStack backgroundFiller = new ItemBuilder(Material.LIGHT_GRAY_STAINED_GLASS_PANE)
-                .setDisplayName("§7")
-                .build();
+                .setDisplayName("§7").build();
 
-        for (int i = 0; i < size; i++) {
-            gui.setItem(i, backgroundFiller);
-        }
-        for (int i = 0; i < 9; i++) {
-            gui.setItem(i, lineFiller);
-        }
-        for (int i = size - 9; i < size; i++) {
-            gui.setItem(i, lineFiller);
-        }
+        for (int i = 0; i < size; i++) gui.setItem(i, backgroundFiller);
 
-        //  ********** Generator Category Items *********
-        int categoryIndex = 2;
+        for (int i = 0; i < 9; i++) gui.setItem(i, lineFiller);
+
+        for (int i = size - 9; i < size; i++) gui.setItem(i, lineFiller);
+    }
+
+    /**
+     * Adds built-in category buttons.
+     */
+    private void addCategoryButtons(Inventory gui, IGeneratorCategory selectedCategory) {
+        int index = 2;
         for (GeneratorCategory category : GeneratorCategory.values()) {
             ItemStack item = new ItemBuilder(Material.valueOf(category.name()))
                     .setDisplayName(ChatColor.YELLOW + category.getDisplayName())
-                    .setNBT("category", category.name())
-                    .build();
+                    .setNBT("category", category.name()).build();
             if (selectedCategory == category) {
                 item = new ItemBuilder(item)
                         .addEnchant(Enchantment.MENDING, 1)
-                        .addFlags(ItemFlag.HIDE_ENCHANTS)
-                        .build();
+                        .addFlags(ItemFlag.HIDE_ENCHANTS).build();
             }
-
-            gui.setItem(categoryIndex++, item);
-
+            gui.setItem(index++, item);
         }
-        ItemStack allCategory = new ItemBuilder(Material.LIME_CANDLE)
-                .setDisplayName(ChatColor.GREEN + "ALL")
-                .setNBT("category", "ALL")
-                .build();
+        // "All" button
+        ItemStack all = new ItemBuilder(Material.LIME_CANDLE)
+                .setDisplayName(messages.get("generator-category.all"))
+                .setNBT("category", "ALL").build();
         if (selectedCategory == null) {
-            allCategory = new ItemBuilder(allCategory)
+            all = new ItemBuilder(all)
                     .addEnchant(Enchantment.MENDING, 1)
-                    .addFlags(ItemFlag.HIDE_ENCHANTS)
-                    .build();
+                    .addFlags(ItemFlag.HIDE_ENCHANTS).build();
         }
-        gui.setItem(6, allCategory);
-        
+        gui.setItem(6, all);
+    }
 
-        //  **********  Generator Type Items **********
+    /**
+     * Adds the custom categories button if any exist.
+     */
+    private void addCustomCategoryButton(Inventory gui, IGeneratorCategory selectedCategory) {
+        if (categoryManager.getAllCategories().isEmpty()) return;
+        ItemStack custom = new ItemBuilder(Material.MAGENTA_CANDLE)
+                .setDisplayName(messages.get("generator-category.custom"))
+                .setNBT("category", "CUSTOM").build();
+        if (selectedCategory instanceof CustomGeneratorCategory) {
+            custom = new ItemBuilder(custom)
+                    .addEnchant(Enchantment.MENDING, 1)
+                    .addFlags(ItemFlag.HIDE_ENCHANTS).build();
+        }
+        gui.setItem(40, custom);
+    }
 
-        int typeIndex = 9;
-        Optional<Island> optionalIsland = BentoBox.getInstance().getIslandsManager().getIslandAt(player.getLocation());
-        if (optionalIsland.isEmpty()) {
+    /**
+     * Populates generator type items in the GUI.
+     */
+    private void populateTypes(Inventory gui, Player player,
+                               IGeneratorCategory selectedCategory,
+                               List<GeneratorType> types) {
+        Optional<Island> opt = BentoBox.getInstance().getIslandsManager()
+                .getIslandAt(player.getLocation());
+        if (opt.isEmpty()) {
             player.sendMessage(messages.get("commands.general.no-island"));
             return;
         }
-        Island island = optionalIsland.get();
-
-        String islandId = island.getUniqueId();
-        Set<String> ownedTypes = manager.getOwnedTypes(islandId);
+        String islandId = opt.get().getUniqueId();
+        Set<String> owned = manager.getOwnedTypes(islandId);
+        int idx = 9;
         for (GeneratorType type : types) {
-            if (typeIndex >= size) break;
-
+            if (idx >= gui.getSize()) break;
             ItemBuilder builder = new ItemBuilder(type.buildItem());
-            boolean isOwned = ownedTypes.contains(type.getId());
+            boolean isOwned = owned.contains(type.getId());
             boolean isActive = manager.isGeneratorTypeActive(islandId, type.getId());
 
             builder.addLoreLine("");
-
             if (isActive) {
                 builder.addLoreLine(messages.get("gui.click-to-deactivate"));
                 builder.setNBT("is_owned", "active");
@@ -126,14 +184,11 @@ public class GeneratorMenu {
                 builder.setNBT("is_owned", "false");
             }
 
-            if (isActive) {
-                builder.addEnchant(Enchantment.MENDING, 1);
-                builder.addFlags(ItemFlag.HIDE_ENCHANTS);
-            }
+            if (isActive) builder.addEnchant(Enchantment.MENDING, 1)
+                    .addFlags(ItemFlag.HIDE_ENCHANTS);
 
-            gui.setItem(typeIndex++, builder.build());
+            gui.setItem(idx++, builder.build());
         }
-        player.openInventory(gui);
     }
 
 }

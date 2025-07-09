@@ -51,7 +51,7 @@ public class GeneratorTypeLoader {
             String materialName = genSec.getString("material", "STONE");
             Material material = Material.matchMaterial(materialName.toUpperCase());
             if (material == null) {
-                plugin.getLogger().warning("Bilinmeyen material: " + materialName + " (ID: " + id + ")");
+                plugin.getLogger().warning("Unknown Material : " + materialName + " (ID: " + id + ")");
                 continue;
             }
 
@@ -66,7 +66,7 @@ public class GeneratorTypeLoader {
                 try {
                     category = GeneratorCategory.valueOf(categoryName);
                 } catch (IllegalArgumentException e) {
-                    plugin.getLogger().warning("Geçersiz generator-type: " + categoryName + " (ID: " + id + ")");
+                    plugin.getLogger().warning("Unknown generator-type: " + categoryName + " (ID: " + id + ")");
                     continue;
                 }
             }
@@ -78,14 +78,14 @@ public class GeneratorTypeLoader {
             Map<Material, Double> blockChances = new LinkedHashMap<>();
             ConfigurationSection blocksSec = genSec.getConfigurationSection("blocks");
             if (blocksSec == null) {
-                plugin.getLogger().warning("Blok oranları eksik: " + id);
+                plugin.getLogger().warning("Block Changes missing : " + id);
                 continue;
             }
 
             for (String matName : blocksSec.getKeys(false)) {
                 Material blockType = Material.matchMaterial(matName.toUpperCase());
                 if (blockType == null) {
-                    plugin.getLogger().warning("Bilinmeyen blok türü: " + matName + " (ID: " + id + ")");
+                    plugin.getLogger().warning("Unknown block type: " + matName + " (ID: " + id + ")");
                     continue;
                 }
                 double chance = blocksSec.getDouble(matName);
@@ -105,12 +105,12 @@ public class GeneratorTypeLoader {
             type.setPriority(priority++);
             manager.registerGeneratorType(type);
 
-            plugin.getLogger().info(id + " yüklendi");
-            plugin.getLogger().info(type.toString());
-            plugin.getLogger().info("==============================");
+            plugin.getLogger().info(id + " loaded");
+            plugin.getLogger().info(type.getBlockChances().toString());
+            plugin.getLogger().info("");
         }
 
         plugin.getLogger().info(priority + " jeneratör tipi yüklendi.");
-        plugin.getLogger().info("==============================");
+        plugin.getLogger().info("");
     }
 }

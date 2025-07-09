@@ -69,11 +69,29 @@ public class FertilizeListener implements Listener {
             BlockState state = iterator.next();
             Block target = state.getBlock();
 
-            if (target.getLocation().distanceSquared(loc) > 4
-                || !allowed.contains(target.getType())
-                || target.getType().equals(Material.TALL_GRASS)
-                || random.nextDouble(1) < 0.5) {
+            if (!allowed.contains(target.getType())) {
                 iterator.remove();
+                continue;
+            }
+
+            if (target.getLocation().distanceSquared(loc) > 4 || random.nextDouble(1) < 0.5) {
+                iterator.remove();
+                continue;
+            }
+
+            Material type = target.getType();
+
+            // Eğer bitki ise ve altı geçerli değilse
+            if (isPlant(type)) {
+                Block below = target.getRelative(0, -1, 0);
+                if (!allowed.contains(below.getType()) || below.getType() != Material.MOSS_BLOCK) {
+                    iterator.remove();
+
+                    // Eğer bu TALL_GRASS ise alt kısmını da sil
+                    if (type == Material.TALL_GRASS) {
+                        event.getBlocks().removeIf(bs -> bs.getLocation().equals(below.getLocation()));
+                    }
+                }
             }
         }
         if (blocks.isEmpty()) event.setCancelled(true);
@@ -81,6 +99,13 @@ public class FertilizeListener implements Listener {
 
     private int randomThreshold() {
         return 5 + random.nextInt(5);
+    }
+
+    private boolean isPlant(Material type) {
+        return switch (type) {
+            case TALL_GRASS, SHORT_GRASS, MOSS_CARPET, AZALEA, FLOWERING_AZALEA -> true;
+            default -> false;
+        };
     }
 
 
