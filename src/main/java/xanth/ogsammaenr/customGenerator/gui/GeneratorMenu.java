@@ -37,6 +37,8 @@ public class GeneratorMenu {
     private final CustomCategoryManager categoryManager;
     private final MessagesManager messages;
 
+    private static final int ITEMS_PER_PAGE = 27;
+
     /**
      * Constructs the menu with necessary plugin managers.
      *
@@ -55,7 +57,7 @@ public class GeneratorMenu {
      * @param player           the player to open the menu for
      * @param selectedCategory optional category to filter, null for all
      */
-    public void openMenu(Player player, @Nullable IGeneratorCategory selectedCategory) {
+    public void openMenu(Player player, @Nullable IGeneratorCategory selectedCategory, int page) {
         // Build filtered, sorted list of generator types
         List<GeneratorType> types = manager.getAllRegisteredTypes().values().stream()
                 .filter(type -> selectedCategory == null
@@ -73,7 +75,7 @@ public class GeneratorMenu {
         fillBackground(gui, size);
         addCategoryButtons(gui, selectedCategory);
         addCustomCategoryButton(gui, selectedCategory);
-        populateTypes(gui, player, selectedCategory, types);
+        populateTypes(gui, player, selectedCategory, types, page);
 
         player.openInventory(gui);
     }
@@ -155,7 +157,7 @@ public class GeneratorMenu {
      */
     private void populateTypes(Inventory gui, Player player,
                                IGeneratorCategory selectedCategory,
-                               List<GeneratorType> types) {
+                               List<GeneratorType> types, int page) {
         Optional<Island> opt = BentoBox.getInstance().getIslandsManager()
                 .getIslandAt(player.getLocation());
         if (opt.isEmpty()) {
@@ -164,9 +166,13 @@ public class GeneratorMenu {
         }
         String islandId = opt.get().getUniqueId();
         Set<String> owned = manager.getOwnedTypes(islandId);
-        int idx = 9;
-        for (GeneratorType type : types) {
-            if (idx >= gui.getSize()) break;
+
+        int startIndex = page * ITEMS_PER_PAGE;
+        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, types.size());
+        int guiIndex = 9;
+
+        for (int i = startIndex; i < endIndex; i++) {
+            GeneratorType type = types.get(i);
             ItemBuilder builder = new ItemBuilder(type.buildItem());
             boolean isOwned = owned.contains(type.getId());
             boolean isActive = manager.isGeneratorTypeActive(islandId, type.getId());
@@ -187,7 +193,33 @@ public class GeneratorMenu {
             if (isActive) builder.addEnchant(Enchantment.MENDING, 1)
                     .addFlags(ItemFlag.HIDE_ENCHANTS);
 
-            gui.setItem(idx++, builder.build());
+            builder.setNBT("current-page", String.valueOf(page));
+
+            gui.setItem(guiIndex++, builder.build());
+        }
+
+        addPaginationButtons(gui, page, types.size());
+    }
+
+    private void addPaginationButtons(Inventory gui, int currentPage, int totalItems) {
+        int totalPages = (int) Math.ceil(totalItems / (double) ITEMS_PER_PAGE);
+
+        // Show "Previous Page" only if we're not on the first page
+        if (currentPage > 0) {
+            ItemStack prevPage = new ItemBuilder(Material.ARROW)
+                    .setDisplayName(messages.get("gui.previous-page"))
+                    .setNBT("page", String.valueOf(currentPage - 1))
+                    .build();
+            gui.setItem(36, prevPage);
+        }
+
+        // Show "Next Page" only if there are more pages ahead
+        if (currentPage < totalPages - 1) {
+            ItemStack nextPage = new ItemBuilder(Material.ARROW)
+                    .setDisplayName(messages.get("gui.next-page"))
+                    .setNBT("page", String.valueOf(currentPage + 1))
+                    .build();
+            gui.setItem(44, nextPage);
         }
     }
 

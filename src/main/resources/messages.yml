@@ -44,6 +44,8 @@ gui:
   click-to-buy: "&7Click to &ebuy"
   click-to-deactivate: "&7Click to &edeactivate"
   deactivate: "&e%category% &agenerator deactivated"
+  next-page: "&aNext Page →"
+  previous-page: "&a← Previous Page"
 
 generator-category:
   cobblestone: "&7Cobblestone"

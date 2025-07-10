@@ -266,7 +266,7 @@ public class GeneratorCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        new GeneratorMenu(plugin).openMenu(player, null);
+        new GeneratorMenu(plugin).openMenu(player, null, 0);
     }
 
     /**

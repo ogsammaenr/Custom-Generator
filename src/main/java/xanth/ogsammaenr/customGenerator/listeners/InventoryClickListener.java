@@ -68,6 +68,7 @@ public class InventoryClickListener implements Listener {
         }
 
         e.setCancelled(true);
+
         String[] parts = e.getView().getTitle().split(" ");
         String selectedCategoryId = parts[parts.length - 1];
 
@@ -89,24 +90,36 @@ public class InventoryClickListener implements Listener {
         String generatorId = getStringTag(clicked, "generator_id");
         String deactivate = getStringTag(clicked, "deactivate");
 
+        String current_page = getStringTag(clicked, "current_page");
+
+        String pageTag = getStringTag(clicked, "page");
+        if (pageTag != null) {
+            try {
+                int targetPage = Integer.parseInt(pageTag);
+                new GeneratorMenu(plugin).openMenu(player, selectedCategory, targetPage);
+            } catch (NumberFormatException ignored) {
+            }
+            return;
+        }
+
+        int page = current_page != null ? Integer.parseInt(current_page) : 0;
         // Category navigation
         if (categoryId != null) {
             if (categoryId.equals("ALL")) {
-                new GeneratorMenu(plugin).openMenu(player, null);
+                new GeneratorMenu(plugin).openMenu(player, null, 0);
             } else if (categoryId.equals("CUSTOM")) {
-                new GeneratorMenu(plugin).openMenu(player,
-                        customCatManager.getAllCategories().stream().findFirst().orElse(null));
+                new GeneratorMenu(plugin).openMenu(player, customCatManager.getAllCategories().stream().findFirst().orElse(null), 0);
             } else {
-                new GeneratorMenu(plugin).openMenu(player, GeneratorCategory.valueOf(categoryId));
+                new GeneratorMenu(plugin).openMenu(player, GeneratorCategory.valueOf(categoryId), 0);
             }
             return;
         }
 
         // Generator purchase / activation / deactivation
         if (deactivate != null) {
-            handleDeactivate(player, selectedCategory, deactivate);
+            handleDeactivate(player, selectedCategory, deactivate, page);
         } else if (generatorId != null) {
-            handleGeneratorAction(player, selectedCategory, generatorId, isOwned);
+            handleGeneratorAction(player, selectedCategory, generatorId, isOwned, page);
         }
     }
 
@@ -114,7 +127,7 @@ public class InventoryClickListener implements Listener {
      * Processes buying or activating a generator based on NBT flags.
      */
     private void handleGeneratorAction(Player player, IGeneratorCategory selectedCategory,
-                                       String generatorId, String isOwned) {
+                                       String generatorId, String isOwned, int page) {
         GeneratorType type = manager.getRegisteredType(generatorId);
         Optional<Island> opt = islandsManager.getIslandAt(player.getLocation());
         if (opt.isEmpty()) {
@@ -126,21 +139,21 @@ public class InventoryClickListener implements Listener {
         if (isOwned.equals("true")) {
             // Activate generator
             manager.setGeneratorType(island.getUniqueId(), generatorId);
-            reshowMenu(player, selectedCategory);
+            reshowMenu(player, selectedCategory, page);
             player.sendMessage(messages.getFormatted("commands.activate.success",
                     Map.of("category", type.getGeneratorCategory().getDisplayName(),
                             "generator", type.getDisplayName())));
         } else {
             // Buy generator
-            attemptPurchase(player, island.getUniqueId(), type, selectedCategory);
+            attemptPurchase(player, island.getUniqueId(), type, selectedCategory, page);
         }
     }
 
     /**
      * Attempts to purchase a generator, performing level and economy checks.
      */
-    private void attemptPurchase(Player player, String islandId,
-                                 GeneratorType type, IGeneratorCategory selectedCategory) {
+    private void attemptPurchase(Player player, String islandId, GeneratorType type,
+                                 IGeneratorCategory selectedCategory, int page) {
         if (manager.islandOwnsType(islandId, type.getId())) return;
         long level = islandUtils.getIslandLevel(player.getUniqueId(), player.getWorld().getName());
         if (level < type.getRequiredIslandLevel()) {
@@ -156,7 +169,7 @@ public class InventoryClickListener implements Listener {
         }
         economy.withdrawPlayer(player, price);
         manager.addOwnedType(islandId, type.getId());
-        reshowMenu(player, selectedCategory);
+        reshowMenu(player, selectedCategory, page);
         player.sendMessage(messages.getFormatted("commands.buy.success",
                 Map.of("generator", type.getDisplayName(), "price", String.valueOf(price))));
     }
@@ -165,7 +178,7 @@ public class InventoryClickListener implements Listener {
      * Handles deactivation of a generator type.
      */
     private void handleDeactivate(Player player, IGeneratorCategory selectedCategory,
-                                  String deactivate) {
+                                  String deactivate, int page) {
         IGeneratorCategory category = null;
         try {
             category = GeneratorCategory.valueOf(deactivate);
@@ -177,7 +190,7 @@ public class InventoryClickListener implements Listener {
         manager.removeGeneratorType(
                 islandsManager.getIslandAt(player.getLocation()).get().getUniqueId(),
                 category);
-        reshowMenu(player, selectedCategory);
+        reshowMenu(player, selectedCategory, page);
         player.sendMessage(messages.getFormatted("gui.deactivate",
                 Map.of("category", category.getDisplayName())));
     }
@@ -185,9 +198,9 @@ public class InventoryClickListener implements Listener {
     /**
      * Utility to reopen the generator menu after a short delay.
      */
-    private void reshowMenu(Player player, IGeneratorCategory selectedCategory) {
+    private void reshowMenu(Player player, IGeneratorCategory selectedCategory, int page) {
         Bukkit.getScheduler().runTaskLater(plugin, () ->
-                new GeneratorMenu(plugin).openMenu(player, selectedCategory), 3L);
+                new GeneratorMenu(plugin).openMenu(player, selectedCategory, page), 3L);
     }
 
     /**
